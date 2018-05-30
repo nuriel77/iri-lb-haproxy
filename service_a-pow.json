@@ -1,0 +1,20 @@
+{
+  "ID": "185.10.48.110:15265-pow",
+  "Name": "fabio.iota.lb",
+  "tags": [
+    "haproxy.maxconn=7",
+    "haproxy.scheme=http",
+    "haproxy.pow=true"
+  ],
+  "Address": "185.10.48.110",
+  "Port": 15265,
+  "EnableTagOverride": false,
+  "Check": {
+    "id": "185.10.48.110:15265-pow",
+    "name": "API 185.10.48.110:15265-pow",
+    "args": ["/usr/local/bin/node_check.sh", "-a", "http://185.10.48.110:15265", "-i", "-p"],
+    "Interval": "30s",
+    "timeout": "5s",
+    "DeregisterCriticalServiceAfter": "1m"
+  }
+}

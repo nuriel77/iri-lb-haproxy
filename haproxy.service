@@ -1,0 +1,13 @@
+[Unit]
+Description=HAProxy Load Balancer
+After=syslog.target network.target consul.service
+
+[Service]
+EnvironmentFile=-/etc/sysconfig/haproxy
+ExecStart=/usr/local/sbin/haproxy -f /etc/haproxy/haproxy.cfg -p /run/haproxy.pid $OPTIONS
+ExecStartPost=/usr/local/bin/consul_haproxy_handler.py
+ExecReload=/usr/local/bin/consul_haproxy_handler.py
+KillMode=mixed
+
+[Install]
+WantedBy=multi-user.target
