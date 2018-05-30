@@ -104,7 +104,6 @@ def parse_consul_services(consul_services, consul_checks):
         server_health = get_service_health(consul_checks, '%s' %
                                            server['ServiceID'])
 
-        # Check if this is a FQDN or IP
         server_data = {
             'ServiceAddress': server['ServiceAddress'],
             'ServicePort': server['ServicePort'],
