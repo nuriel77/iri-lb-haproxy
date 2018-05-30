@@ -1,0 +1,44 @@
+{
+  "datacenter": "my_dc",
+  "data_dir": "/var/lib/consul",
+  "domain": "my.domain",
+  "encrypt": "XX/XX==",
+  "log_level": "debug",
+  "node_name": "localhost",
+  "enable_script_checks": true,
+  "bootstrap": true,
+  "enable_syslog": true,
+  "leave_on_terminate": true,
+  "rejoin_after_leave": true,
+  "server": true,
+  "bind_addr": "127.0.0.1",
+  "advertise_addr": "127.0.0.1",
+  "client_addr": "127.0.0.1",
+  "advertise_addr_wan": "127.0.0.1",
+  "dns_config": {
+    "allow_stale": true,
+    "max_stale": "30s",
+    "node_ttl": "30s",
+    "enable_truncate": true,
+    "only_passing": true
+  },
+  "watches": [
+    {
+      "type": "service",
+      "service": "my.iota.lb",
+      "handler_type": "script",
+      "passingonly": true,
+      "args": ["/usr/bin/python", "/usr/local/bin/consul_haproxy_handler.py"]
+    },
+    {
+      "type": "checks",
+      "service": "my.iota.lb",
+      "handler_type" : "script",
+      "args": ["/usr/bin/python", "/usr/local/bin/consul_haproxy_handler.py"]
+    }
+  ],
+  "acl_datacenter": "my_dc",
+  "acl_default_policy": "allow",
+  "acl_down_policy": "extend-cache",
+  "acl_master_token": "xxxx-xxxx-xxxx-xxxx"
+}

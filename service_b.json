@@ -1,0 +1,18 @@
+{
+  "ID": "10.80.0.10:16265",
+  "Name": "my.iota.lb",
+  "tags": [
+    "urlprefix-my.iota.lb/"
+  ],
+  "Address": "10.80.0.10",
+  "Port": 16265,
+  "EnableTagOverride": false,
+  "Check": {
+    "id": "10.80.0.10:16265",
+    "name": "API http://node01.iota.io:16265",
+    "args": ["/usr/local/bin/node_check.sh", "-a", "http://node01.iota.io:16265", "-i", "-m", "1.4.1.7"],
+    "Interval": "30s",
+    "timeout": "5s",
+    "DeregisterCriticalServiceAfter": "1m"
+  }
+}

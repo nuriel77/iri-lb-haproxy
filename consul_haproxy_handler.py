@@ -16,7 +16,7 @@ class Struct:
 
 args = Struct(**dict(
     consul_api_server = "http://localhost:8500",
-    consul_service = "fabio.iota.lb",
+    consul_service = "my.iota.lb",
     haproxy_server = "/var/run/hapee-lb.sock",
     #haproxy_server = ('127.0.0.1', 9999)
     backend_name = "iri_back",
@@ -27,7 +27,7 @@ args = Struct(**dict(
     consul_tag_prefix = 'haproxy',
     socket_connect_retry = 30,
     socket_connect_timeout = 10,
-    consul_token = 'de61c58c-49b9-4a4e-99e7-9427d466b9b0',
+    consul_token = 'xxxx-xxxx-xxxx-xxxx',
     valid_tags = ['sslverify', 'maxconn', 'weight', 'scheme', 'pow']
 ))
 
