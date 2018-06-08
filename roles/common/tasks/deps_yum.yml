@@ -1,0 +1,18 @@
+- name: Install epel-release
+  yum: state=latest name=epel-release
+
+- name: Install some packages
+  yum: state=latest name={{ item }}
+  with_items:
+    - policycoreutils-python
+    - firewalld
+    - curl
+    - wget
+    - lsof
+    - jq
+    - pv
+    - sysstat
+    - atop
+    - htop
+    - openssl
+    - unzip

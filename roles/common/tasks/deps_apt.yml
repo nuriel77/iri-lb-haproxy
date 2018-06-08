@@ -1,0 +1,19 @@
+- name: Update all packages to the latest version
+  apt:
+    upgrade: dist
+
+- name: Install software-properties-common
+  apt: state=latest name=software-properties-common update_cache=yes
+
+- name: Install some packages
+  apt: state=latest name={{ item }} update_cache=yes
+  with_items:
+    - ufw
+    - wget
+    - lsof
+    - curl
+    - sysstat
+    - atop
+    - htop
+    - openssl
+    - unzip

@@ -1,9 +1,7 @@
 {
   "ID": "10.80.0.10:16265",
   "Name": "my.iota.lb",
-  "tags": [
-    "urlprefix-my.iota.lb/"
-  ],
+  "tags": [],
   "Address": "10.80.0.10",
   "Port": 16265,
   "EnableTagOverride": false,

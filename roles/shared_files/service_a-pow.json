@@ -1,6 +1,6 @@
 {
   "ID": "10.10.0.110:15265-pow",
-  "Name": "my.iota.lb",
+  "Name": "my.loadbalancer.io",
   "tags": [
     "haproxy.maxconn=7",
     "haproxy.scheme=http",

@@ -1,0 +1,5 @@
+[consul]
+localhost ansible_connection=local
+
+[haproxy]
+localhost ansible_connection=local

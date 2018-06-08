@@ -21,6 +21,17 @@
   tags:
     - consul_user
 
+- name: copy scripts
+  copy:
+    src: "files/{{ item }}"
+    dest: "/usr/local/bin/{{ item }}"
+    mode: 0755
+  with_items:
+    - node_check.sh
+    - consul_haproxy_handler.py
+  tags:
+    - scripts
+
 - name: Ensure consul directories exist
   file:
     state: directory

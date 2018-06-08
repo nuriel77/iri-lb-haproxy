@@ -1,0 +1,17 @@
+- import_tasks: config.yml
+  tags:
+    - common_config
+
+- import_tasks: deps_apt.yml
+  tags:
+    - deps_apt
+  when: ansible_distribution == 'Ubuntu'
+
+- import_tasks: deps_yum.yml
+  tags:
+    - deps_yum
+  when: ansible_distribution == 'CentOS'
+
+- import_tasks: ssl.yml
+  tags:
+    - ssl

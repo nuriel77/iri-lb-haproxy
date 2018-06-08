@@ -1,0 +1,9 @@
+- name: set max usage for journald
+  lineinfile:
+    path: /etc/systemd/journald.conf
+    regexp: '^SystemMaxUse='
+    line: "SystemMaxUse={{ journald_max_log_size | default('1000M') }}"
+  tags:
+    - journald
+  notify:
+    - restart journald

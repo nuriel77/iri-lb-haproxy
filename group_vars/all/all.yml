@@ -69,6 +69,9 @@ haproxy_username: haproxy
 haproxy_base_version: 1.8
 haproxy_min_version: 3
 
+# Create self signed certificate for haproxy
+create_selfsigned_cert: True
+
 # A list of IPs to whitelist on haproxy
 # This will allow those IPs to bypass command
 # regex limitations. The format is a yaml list

@@ -193,6 +193,8 @@ listen stats
     stats hide-version
     stats uri /
 
+{% if admin_password is defined %}
     # Lock with password
     acl lb_allow http_auth(lb_auth)
     http-request auth realm UserAuth if !lb_allow
+{% endif %}

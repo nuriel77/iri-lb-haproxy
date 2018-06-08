@@ -1,0 +1,17 @@
+- hosts: all
+  become: true
+  become_method: sudo
+  roles:
+    - common
+
+- hosts: consul
+  become: true
+  become_method: sudo
+  roles:
+    - consul
+
+- hosts: haproxy
+  become: true
+  become_method: sudo
+  roles:
+    - haproxy

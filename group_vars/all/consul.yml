@@ -1,5 +1,5 @@
-consul_version: '1.0.3'
-consul_binary_checksum: "255562bfc33e32a1fc114c950e87a60043d88caead024c4c99e7706278eacdf4"
+consul_version: '1.1.0'
+consul_binary_checksum: "027630ce1aaa4af5e966d0467d20638cada2bda5ceacd09ff3429daff965ddc0"
 consul_username: consul
 consul_config_dir: /etc/consul
 consul_bin_dir: /usr/local/bin
