@@ -1,0 +1,14 @@
+- import_tasks: firewalld.yml
+  tags:
+    - consul_firewalld
+  when: ansible_distribution == 'CentOS'
+
+- import_tasks: ufw.yml
+  tags:
+    - consul_ufw
+  when: ansible_distribution == 'Ubuntu'
+
+- import_tasks: config.yml
+  tags:
+    - consul_config
+

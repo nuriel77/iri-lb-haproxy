@@ -1,0 +1,190 @@
+- name: set consul download url
+  set_fact:
+    consul_url: "https://releases.hashicorp.com/consul/{{ consul_version }}/consul_{{ consul_version }}_linux_amd64.zip"
+
+- name: set interface ip
+  set_fact:
+    consul_ip: hostvars[inventory_hostname]['ansible_default_ipv4']['address'] 
+  when: groups['consul'] | length > 1
+
+- name: set local ip
+  set_fact:
+    consul_ip: 127.0.0.1
+  when: groups['consul'] | length == 1
+
+- name: Create user consul
+  user:
+    name: "{{ consul_username }}"
+    shell: /sbin/nologin
+    createhome: no
+    home: "{{ consul_data_dir }}"
+  tags:
+    - consul_user
+
+- name: Ensure consul directories exist
+  file:
+    state: directory
+    mode: 0700
+    dest: "{{ item }}"
+    owner: "{{ consul_username }}"
+    group: "{{ consul_username }}"
+  with_items:
+    - "{{ consul_config_dir }}"
+    - "{{ consul_config_dir }}/certs.d"
+    - "{{ consul_config_dir }}/conf.d"
+    - "{{ consul_data_dir }}"
+
+- name: check consul binary exists
+  stat:
+    path: "{{ consul_bin_dir }}/consul"
+  register: consul_binary
+
+- name: extract consul from zip
+  unarchive:
+    src: "{{ consul_url }}"
+    dest: "{{ consul_bin_dir }}/"
+    remote_src: yes
+    mode: 0750
+    group: consul
+    owner: root
+  when: not consul_binary.stat.exists
+  register: consul_download
+
+- name: get consul binary checksum
+  stat:
+    path: "{{ consul_bin_dir }}/consul"
+    checksum_algorithm: sha256
+  register: consul_sha
+
+- name: validate consul checksum
+  assert:
+    that: "'{{ consul_binary_checksum }}' == consul_sha.stat.checksum"
+  when: consul_download.changed
+
+- name: ensure consul binary ownership and mode
+  file:
+    path: "{{ consul_bin_dir }}/consul"
+    owner: consul
+    group: consul
+    mode: 0750
+  when: not consul_download.changed
+
+- name: copy consul environment file
+  copy:
+    src: files/sysconfig.consul
+    dest: /etc/sysconfig/consul
+
+- name: copy consul systemd file
+  template:
+    src: templates/consul.service.j2
+    dest: /etc/systemd/system/consul.service
+  notify:
+    - reload systemd
+
+- name: check consul key exists
+  run_once: yes
+  stat:
+    path: "{{ consul_config_dir }}/{{ consul_key_file }}"
+  register: consul_key
+  tags:
+    - consul_tokens
+
+- name: create a new encryption key
+  run_once: yes
+  shell: "{{ consul_bin_dir }}/consul keygen > {{ consul_config_dir }}/{{ consul_key_file }}"
+  when: not consul_key.stat.exists
+  tags:
+    - consul_tokens
+
+- name: ensure key file mode
+  run_once: yes
+  file:
+    path: "{{ consul_config_dir }}/{{ consul_key_file }}"
+    owner: "{{ consul_username }}"
+    group: "{{ consul_username }}"
+    mode: 0400
+  tags:
+    - consul_tokens
+
+- name: slurp key
+  run_once: yes
+  shell: "echo -n $(cat {{ consul_config_dir }}/{{ consul_key_file }})"
+  register: consul_key_data
+  changed_when: false
+  tags:
+    - consul_tokens
+
+- name: check master token file exists
+  run_once: yes
+  stat:
+    path: "{{ consul_config_dir }}/{{ consul_master_token_file }}"
+  register: consul_token
+  tags:
+    - consul_tokens
+
+- name: create a new master token
+  run_once: yes
+  shell: "uuidgen > {{ consul_config_dir }}/{{ consul_master_token_file }}"
+  when: consul_token.stat.exists == False
+  tags:
+    - consul_tokens
+
+- name: ensure master token file mode
+  run_once: yes
+  file:
+    path: "{{ consul_config_dir }}/{{ consul_master_token_file }}"
+    owner: "{{ consul_username }}"
+    group: "{{ consul_username }}"
+    mode: 0400
+  tags:
+    - consul_tokens
+
+- name: slurp master token
+  run_once: yes
+  shell: "echo -n $(cat {{ consul_config_dir }}/{{ consul_master_token_file }})"
+  register: consul_master_token
+  changed_when: false
+  tags:
+    - consul_tokens
+
+- name: copy validation script
+  template:
+    src: templates/consul_validator.sh.j2
+    dest: "{{ consul_bin_dir }}/consul_validator.sh"
+    mode: 0700
+
+- name: copy consul configuration files
+  template:
+    src: "templates/{{ item }}.j2"
+    dest: "{{ consul_config_dir }}/conf.d/{{ item }}"
+    owner: "{{ consul_username }}"
+    group: "{{ consul_username }}"
+    mode: 0600
+    validate: "{{ consul_bin_dir }}/consul_validator.sh %s"
+  with_items:
+    - main.json
+  notify: restart consul
+  tags:
+    - consul_tokens
+
+- name: flush handlers
+  meta: flush_handlers
+
+- name: ensure consul started and enabled
+  systemd:
+    name: consul.service
+    state: started
+    enabled: true
+
+- name: add some consul env variables to bashrc
+  blockinfile:
+    path: /root/.bashrc
+    block: |
+      export CONSUL_HTTP_ADDR={{ consul_ip }}:{{ consul_comm_port }}
+      export CONSUL_HTTP_SSL=false
+      export CONSUL_HTTP_TOKEN={{ consul_master_token.stdout }}
+      export PATH=$PATH:{{ consul_bin_dir }}
+      export NODE_NAME=$(hostname -I)
+    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+  tags:
+    - bashrc

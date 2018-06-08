@@ -1,0 +1,84 @@
+# consul watch handler
+consul_haproxy_handler: /usr/local/bin/consul_haproxy_handler.py
+
+# custom health check for iri nodes
+consul_node_check: /usr/local/bin/node_check.sh
+
+# haproxy admin socket address. Comment to disable.
+haproxy_admin_address: 127.0.0.1:9999
+
+# haproxy admin socket file. Comment to disable.
+haproxy_admin_socket: /var/run/hapee-lb.sock
+
+# Change to 0.0.0.0 to bind to all interfaces (expose remotely)
+# or set to bind to a specific interface's IP address
+lb_bind_address: 0.0.0.0
+
+# This will be the external accessible port
+iri_api_port_remote: 14267
+
+# Load balancer max connections (all backends)
+lb_max_connections: 720
+
+# Allowed concurrent connections to all iri backends
+# (pow and default)
+haproxy_iri_max_connections: 360
+
+# Allowed concurrent connections to PoW backend
+max_connections_pow_backend: 180
+
+# Max slots to reserve for PoW backend. This is a number of
+# slots that will be available for registering new IRI nodes
+# to be added to the PoW backend.
+max_pow_backend_slots: 10
+
+# Max slots to reserve for default iri backend. This is a number of
+# slots that will be available for registering new IRI nodes
+# to be added to the default (non-PoW) backend.
+max_backend_slots: 10
+
+# Allowed concurrent connections to a single PoW enabled
+# IRI node. This will set the value for all IRI nodes in PoW
+# backend.
+max_connections_per_pow_backend: 1
+
+# Allowed concurrent connection to default backend (no PoW)
+max_connections_backend: 180
+
+# Enable remote auth with password.
+# This will only allow connections using basic auth.
+haproxy_remote_auth: false
+
+# Stats port for haproxy
+haproxy_stats_port: 9292
+
+# Stats bind to address
+haproxy_stats_address: 127.0.0.1
+
+# Load balancer service name (for consul service registry)
+# Any IRI node service has to be registered with this name.
+lb_service_name: my.loadbalancer.io
+
+# Lua
+lua_version: 5.3.4
+lua_dir: '/opt/lua'
+
+# Haproxy install data
+haproxy_dir: '/opt/haproxy'
+haproxy_username: haproxy
+haproxy_base_version: 1.8
+haproxy_min_version: 3
+
+# A list of IPs to whitelist on haproxy
+# This will allow those IPs to bypass command
+# regex limitations. The format is a yaml list
+# thus ['value', 'value'] or `- value` on each
+# new line.
+haproxy_whitelist:
+  - 127.0.0.1
+
+# Commands to deny access to
+haproxy_deny_regex: '(get|remove|add)Neighbors'
+
+# Bad commands regex example
+haproxy_bad_command: '\"getTransactionsToApprove\"(.*)GFCCGTGSUEVBZYFK9QNAHOVHXUMEATUFLGBZLDKMOGWCXVUZDVEJVCLLCJJ9NQOIMOLMUMFMGZSI99999'

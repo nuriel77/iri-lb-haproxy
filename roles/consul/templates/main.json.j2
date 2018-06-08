@@ -1,0 +1,66 @@
+{
+  "datacenter": "{{ default_dc }}",
+  "data_dir": "{{ consul_data_dir }}",
+  "domain": "{{ default_domain }}",
+  "encrypt": "{{ consul_key_data.stdout }}",
+  "log_level": "{{ consul_debug_level }}",
+  "node_name": "{{ inventory_hostname }}",
+  "enable_script_checks": true,
+{% if groups['consul'] | length == 1 %}
+  "bootstrap": true,
+{% else %}
+  "start_join": [{% for host in groups['consul'] %}"{{ host }}"{% if not loop.last %},{% endif %}{% endfor %}],
+  "bootstrap_expect": {{ groups['consul'] | length }},
+{% endif %}
+  "enable_syslog": true,
+  "leave_on_terminate": true,
+  "rejoin_after_leave": true,
+  "server": true,
+  "bind_addr": "{{ consul_ip }}",
+  "advertise_addr": "{{ consul_ip }}",
+  "client_addr": "{{ consul_ip }}",
+{% if consul_default_key_file is defined and consul_default_cert_file is defined and consul_default_ca_file is defined %}
+  "addresses": {
+    "https": "0.0.0.0"
+  },
+{% endif %}
+  "advertise_addr_wan": "{{ consul_ip }}",
+{% if consul_default_key_file is defined and consul_default_cert_file is defined and consul_default_ca_file is defined %}
+  "ports": {
+    "https": {{ consul_ssl_port }}
+  },
+  "key_file": "{{ consul_default_key_file }}",
+  "cert_file": "{{ consul_default_cert_file }}",
+  "ca_file": "{{ consul_default_ca_file }}",
+{% endif %}
+{% if consul_dns_enabled is defined and consul_dns_enabled %}
+  "dns_config": {
+    "allow_stale": true,
+    "max_stale": "30s",
+    "node_ttl": "30s",
+    "enable_truncate": true,
+    "only_passing": true
+  },
+{% endif %}
+  "watches": [
+    {
+      "type": "service",
+      "service": "{{ lb_service_name }}",
+      "handler_type": "script",
+      "passingonly": true,
+      "args": ["/usr/bin/python", "{{ consul_haproxy_handler }}"]
+    },
+    {
+      "type": "checks",
+      "service": "{{ lb_service_name }}",
+      "handler_type" : "script",
+      "args": ["/usr/bin/python", "{{ consul_haproxy_handler }}"]
+    }
+  ],
+  "acl_datacenter": "{{ default_dc }}",
+  "acl_default_policy": "{{ consul_default_acl_policy | default('allow') }}",
+  "acl_down_policy": "extend-cache",
+  "acl_master_token": "{{ consul_master_token.stdout }}"{% if consul_agent_token is defined %},
+  "acl_agent_token": "{{ consul_agent_token }}"
+{% endif %}
+}

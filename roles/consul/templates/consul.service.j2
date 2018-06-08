@@ -1,0 +1,21 @@
+[Unit]
+Description=consul agent
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+EnvironmentFile=-/etc/sysconfig/consul
+Restart=on-failure
+ExecStart={{ consul_bin_dir }}/consul agent $OPTIONS -config-dir={{ consul_config_dir }}/conf.d
+ExecReload=/bin/kill -HUP $MAINPID
+ExecStop={{ consul_bin_dir }}/consul leave
+User={{ consul_username }}
+
+# Restrict process
+PrivateDevices=yes
+PrivateTmp=yes
+ProtectSystem=full
+ProtectHome=yes
+
+[Install]
+WantedBy=multi-user.target

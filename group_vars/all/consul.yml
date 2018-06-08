@@ -1,0 +1,14 @@
+consul_version: '1.0.3'
+consul_binary_checksum: "255562bfc33e32a1fc114c950e87a60043d88caead024c4c99e7706278eacdf4"
+consul_username: consul
+consul_config_dir: /etc/consul
+consul_bin_dir: /usr/local/bin
+consul_data_dir: /var/lib/consul
+consul_comm_port: 8500
+consul_ssl_port: 8443
+consul_key_file: consul.key
+consul_master_token_file: consul_master_token
+consul_agent_token_file: consul_agent_token
+consul_debug_level: INFO
+default_domain: my.domain
+default_dc: my_dc
