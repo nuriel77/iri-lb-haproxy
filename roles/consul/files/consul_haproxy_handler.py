@@ -1,7 +1,9 @@
 #!/usr/bin/python
+import argparse
 import requests
 import socket
 import time
+import yaml
 import json
 import sys
 from pprint import pprint
@@ -14,22 +16,22 @@ class Struct:
         self.__dict__.update(entries)
 
 
-args = Struct(**dict(
-    consul_api_server = "http://localhost:8500",
-    consul_service = "fabio.iota.lb",
-    haproxy_server = "/var/run/hapee-lb.sock",
-    #haproxy_server = ('127.0.0.1', 9999)
-    backend_name = "iri_back",
-    pow_backend_name = "iri_pow_back",
-    template_addr = '10.20.30.40:80',
-    haproxy_spare_slots = 0,
-    backend_base_name = 'irisrv',
-    consul_tag_prefix = 'haproxy',
-    socket_connect_retry = 30,
-    socket_connect_timeout = 10,
-    consul_token = 'de61c58c-49b9-4a4e-99e7-9427d466b9b0',
-    valid_tags = ['sslverify', 'maxconn', 'weight', 'scheme', 'pow']
-))
+def parse_args():
+
+    parser = argparse.ArgumentParser(
+        description='Consul watch handler')
+
+    parser.add_argument('--config', '-c',
+                        type=str,
+                        default='/etc/consul/handler-config.yml',
+                        help='Config file. Default %(default)s')
+
+    parser.add_argument('--debug', '-d',
+                        action='store_true',
+                        help='Enable debug')
+
+    return parser
+
 
 
 def send_haproxy_command(command):
@@ -407,5 +409,33 @@ def process_services():
             print("default slot now at %s" % default_slot)
 
 
+def load_config(config):
+    with open(config, 'r') as stream:
+        try:
+            return yaml.load(stream)
+        except yaml.YAMLError as e:
+            sys.stderr.write("Error loading yaml configuration file: %s\n" % e)
+            sys.exit(2)
+
+
 if __name__ == "__main__":
+    try:
+        parser = parse_args()
+        pargs = parser.parse_args()
+    except Exception as e:
+        sys.stderr.write("Error parsing arguments: %s\n" % e)
+        sys.exit(1)
+
+    required = ['consul_api_server', 'consul_service', 'backend_name',
+                'pow_backend_name', 'template_addr', 'haproxy_spare_slots',
+                'backend_base_name', 'consul_tag_prefix', 'socket_connect_retry',
+                'socket_connect_timeout', 'consul_token', 'valid_tags']
+
+    obj = load_config(pargs.config)
+    for name in required:
+        if name not in obj:
+            sys.stderr.write("Missing configuration parameter: %s\n" % name)
+            sys.exit(3)
+
+    args = Struct(**dict(obj))
     process_services()

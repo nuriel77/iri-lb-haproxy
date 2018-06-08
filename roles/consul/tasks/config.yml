@@ -178,6 +178,15 @@
   tags:
     - consul_tokens
 
+- name: copy handler config
+  template:
+    src: "templates/consul-haproxy-config.yml.j2"
+    dest: "{{ consul_config_dir }}/handler-config.yml"
+    mode: 0640
+    owner: root
+    group: "{{ consul_username }}"
+    force: "{{ overwrite | default('no') }}"
+
 - name: flush handlers
   meta: flush_handlers
 
