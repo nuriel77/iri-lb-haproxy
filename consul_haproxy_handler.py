@@ -16,7 +16,7 @@ class Struct:
 
 args = Struct(**dict(
     consul_api_server = "http://localhost:8500",
-    consul_service = "my.iota.lb",
+    consul_service = "fabio.iota.lb",
     haproxy_server = "/var/run/hapee-lb.sock",
     #haproxy_server = ('127.0.0.1', 9999)
     backend_name = "iri_back",
@@ -27,7 +27,7 @@ args = Struct(**dict(
     consul_tag_prefix = 'haproxy',
     socket_connect_retry = 30,
     socket_connect_timeout = 10,
-    consul_token = 'xxxx-xxxx-xxxx-xxxx',
+    consul_token = 'de61c58c-49b9-4a4e-99e7-9427d466b9b0',
     valid_tags = ['sslverify', 'maxconn', 'weight', 'scheme', 'pow']
 ))
 
@@ -104,6 +104,7 @@ def parse_consul_services(consul_services, consul_checks):
         server_health = get_service_health(consul_checks, '%s' %
                                            server['ServiceID'])
 
+        # Check if this is a FQDN or IP
         server_data = {
             'ServiceAddress': server['ServiceAddress'],
             'ServicePort': server['ServicePort'],
@@ -128,8 +129,6 @@ def parse_consul_services(consul_services, consul_checks):
 
         services.append(server_data)
 
-    if len(services) < 1:
-        sys.exit(0)
     return services
 
 
@@ -269,12 +268,14 @@ def check_deregister(haproxy_pow_backend, haproxy_default_backend,
     global args
     for _, data in haproxy_pow_backend.iteritems():
         found = False
+        
         for service in consul_services:
             if (service['ServiceID'] == data['address'] and
               data['state'] != 'MAINT'):
                 found = True
+                print "%s found in consul: %s" % (service['ServiceID'], found)
                 break
-        print "%s found in consul: %s" % (service['ServiceID'], found)
+
         if found is False:
             send_haproxy_command("set server %s/%s state maint\n" %
                                  (args.pow_backend_name,
@@ -282,12 +283,14 @@ def check_deregister(haproxy_pow_backend, haproxy_default_backend,
 
     for _, data in haproxy_default_backend.iteritems():
         found = False
+
         for service in consul_services:
             if (service['ServiceID'] == data['address'] and
               data['state'] != 'MAINT'):
                 found = True
+                print "%s found in consul: %s" % (service['ServiceID'], found)
                 break
-        print "%s found in consul: %s" % (service['ServiceID'], found)
+
         if found is False:
             send_haproxy_command("set server %s/%s state maint\n" %
                                  (args.backend_name,
@@ -300,19 +303,10 @@ def process_services():
     json_data = []
     consul_services = []
 
-    # Try from stdin
-    for line in sys.stdin:
-        json_data.append(line)
-
-    try:
-        consul_services = json.loads(json_data)
-    except:
-        print("No services json in stdin")
-        if not len(consul_services):        
-            # Get consul services
-            url = "%s/v1/catalog/service/%s" % (args.consul_api_server,
-                                                args.consul_service)
-            consul_services = get_consul_data(url)
+    # Get consul services
+    url = "%s/v1/catalog/service/%s" % (args.consul_api_server,
+                                        args.consul_service)
+    consul_services = get_consul_data(url)
 
     # Get consul checks
     url = "%s/v1/health/checks/%s" % (args.consul_api_server,
