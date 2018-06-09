@@ -1,10 +1,10 @@
 # IRI HAProxy Load-balancer
 
-This is initial work to create a HAPRoxy load balancer for IRI which can be deployed in a highly available setup.
+This is initial work to create a HAPRoxy load balancer for IRI, which can also be deployed in a highly available setup.
 
 Using HAProxy's new server template syntax: https://www.haproxy.com/blog/dynamic-scaling-for-microservices-with-runtime-api/
 
-The configuration backend is Consul. Consul's configuration enables 'watch events' which calls a handler. The handler is a Python script which adds/updates/removes backends from HAProxy.
+The configuration backend is Consul. Consul's configuration enables 'watch events' that calls a handler script. The handler is a Python script that adds/updates/removes backends from HAProxy.
 
 See Consul's documentation for more information about it: https://www.consul.io/docs/index.html
 
@@ -31,6 +31,7 @@ See Consul's documentation for more information about it: https://www.consul.io/
   * [Service JSON Files](#service-json-files)
   * [Status](#status)
   * [Appendix](#appendix)
+    * [File Locations](#file-locations)
     * [Run with Docker Compose](#run-with-docker-compose)
 
 ## Requirements
@@ -116,7 +117,7 @@ You can add the flag `-f` so the logs are followed live.
 
 Consul holds a registry of services. The services can be, in our example, IRI nodes. We register the IRI nodes in Consul using its API and add a health check.
 
-We are able to add some meta-tags which are going to help control a configuration per IRI node, for example, whether to check if this node has PoW, whether we should authenticate to it via HTTPS, define timeout, max connections and so on.
+We are able to add some meta-tags that are going to help control a configuration per IRI node, for example, whether to check if this node has PoW, whether we should authenticate to it via HTTPS, define timeout, max connections and so on.
 
 Once a service is registered Consul begins to run periodic health checks (defined by our custom script). If the health check is successful or failed will determine if HAProxy keeps it in its pool as a valid node to proxy traffic to.
 
@@ -142,7 +143,7 @@ echo "show stat" | socat stdio tcp4-connect:127.0.0.1:9999
 
 ## Consul
 
-Consul exposes a simple API to register services and healthchecks. Each registered service includes a healthcheck (a simple script) which concludes whether a service is healthy or not. Based on the service's health the backend becomes active or disabled in HAProxy.
+Consul exposes a simple API to register services and healthchecks. Each registered service includes a healthcheck (a simple script) that concludes whether a service is healthy or not. Based on the service's health the backend becomes active or disabled in HAProxy.
 
 On each service registry type event in Consul the Python script is called. It ensures the state is of the services in Consul are reflected in HAProxy's configuration. It communicates with HAProxy via HAProxy's API socket.
 
@@ -182,7 +183,7 @@ See Consul's API documentation for more information: https://www.consul.io/api/i
 
 ## Service JSON files
 
-In the directory `roles/shared-files` you will find some JSON files which are service and health checks definitions which are used to register a new service (IRI node) to consul.
+In the directory `roles/shared-files` you will find some JSON files, which are service and health checks definitions. Those are used to register a new service (IRI node) to consul.
 
 Here is an example with some explanation:
 ```
@@ -224,7 +225,7 @@ Here is an example of a service (IRI node) that supports PoW:
   "Check": {
     "id": "10.10.0.110:15265-pow",
     "name": "API 10.10.0.110:15265-pow",
-    "args": ["/scripts/node_check.sh", "-a", "http://10.10.0.110:15265", "-i", "-p"], <--- Note the `-p` in the arguments which means we validate PoW works.
+    "args": ["/scripts/node_check.sh", "-a", "http://10.10.0.110:15265", "-i", "-p"], <--- Note the `-p` in the arguments, that means we validate PoW works.
     "Interval": "30s",
     "timeout": "5s",
     "DeregisterCriticalServiceAfter": "1m"
@@ -352,7 +353,7 @@ stats,FRONTEND,,,0,0,720,0,0,0,0,0,0,,,,,OPEN,,,,,,,,,1,5,0,,,,0,0,0,0,,,,0,0,0,
 stats,BACKEND,0,0,0,0,72,0,0,0,0,0,,0,0,0,0,UP,0,0,0,,0,17,,,1,5,0,,0,,1,0,,0,,,,0,0,0,0,0,0,,,,0,0,0,0,0,0,0,-1,,,0,0,0,0,,,,,,,,,,,,,,http,roundrobin,,,,,,,
 ```
 
-What you see above are all the reserved slots (in this case just 3 per backend). On the `iri_back` (default backend) there's one new registered service which is being initialized. HAProxy by default runs 4 checks to verify the node is healthy (this is in addition to Consul's checks).
+What you see above are all the reserved slots (in this case just 3 per backend). On the `iri_back` (default backend) there's one new registered service that is being initialized. HAProxy by default runs 4 checks to verify the node is healthy (this is in addition to Consul's checks).
 
 If the node becomes unhealthy or de-registered in Consul, the status will turn from UP to MAINT (the slots stays reserved for this node in case it returns to a healthy state).
 
@@ -361,6 +362,44 @@ If a new node is registered and has no more available slots it will take the slo
 There is no problem to assign a large number of available slots (up to thousands) if you want to serve that many nodes. This can be configured via the playbook in `group_vars/all/all.yml` under `max_pow_backend_slots` and `max_backend_slots`.
 
 ## Appendix
+
+### File Locations
+
+Python script that is called by Consul upon event changes (watch handler):
+```sh
+/usr/local/bin/consul_haproxy_handler.py
+```
+The above script uses this configuration file:
+```sh
+/etc/consul/handler-config.yml
+```
+
+Consul's configuration file:
+```sh
+/etc/consul/conf.d/main.json
+```
+
+Bash script that runs the IRI node health checks:
+```sh
+/usr/local/bin/node_check.sh
+```
+
+HAProxy's configuration file:
+```sh
+/etc/haproxy/haproxy.cfg
+```
+
+Consul's systemd control file:
+```sh
+/etc/systemd/system/consul.service
+```
+
+HAproxy's systemd control file:
+```sh
+/etc/systemd/system/haproxy.service
+```
+
+
 
 ### Run with Docker Compose
 
