@@ -1,0 +1,2 @@
+#!/bin/bash
+echo "show stat" | socat stdio tcp4-connect:127.0.0.1:9999|egrep -v "FRONTEND|BACKEND|10.20.30.40:80" | cut -d, -f1,2,18,19,74

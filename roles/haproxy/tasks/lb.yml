@@ -43,3 +43,11 @@
     state: started
     enabled: yes
     daemon_reload: yes
+
+- name: copy stats command file
+  copy:
+    src: ../shared-files/show-stat
+    dest: /usr/local/bin/show-stat
+    mode: 0755
+  tags:
+    - showstat_script

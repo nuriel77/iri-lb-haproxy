@@ -68,6 +68,7 @@
     - "/var/lib/haproxy"
     - "/etc/{{ etc_config_dir }}/haproxy"
     - "/etc/haproxy"
+    - "/usr/local/bin/show-stat"
 
 - name: remove existing haproxy dir
   file:

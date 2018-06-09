@@ -270,7 +270,28 @@ Example using hostname, the ID must be the resolvable IP of the node's name `nod
 
 ## Status
 
-You can view the status of the backends by querying the HAProxy socket:
+To view a compact view of HAProxy's current status run:
+```sh
+echo "show stat" | socat stdio tcp4-connect:127.0.0.1:9999|egrep -v "FRONTEND|BACKEND|10.20.30.40:80" | cut -d, -f1,2,18,19,74
+```
+
+This will result in something like:
+```sh
+# pxname,svname,status,weight,addr
+iri_pow_back,irisrv2,MAINT,1,149.210.154.132:14265
+iri_back,irisrv2,UP,1,185.10.48.110:15265
+iri_back,irisrv3,MAINT,1,201.10.48.110:15265
+iri_back,irisrv4,UP,1,80.61.194.94:16265
+```
+We see the backend name, service slot name, status (UP or MAINT), the weight, IP address and port.
+
+When a service is in MAINT it means it has been disabled because either health check is failing or it has been de-registered from Consul.
+
+The above "long" command has been added to the file `roles/shared-files/show-stat` and can be run on the command-line using `shot-stat`.
+
+
+
+You can view the full status of the backends by querying the HAProxy socket:
 
 ```sh
 # echo "show stat" | socat stdio tcp4-connect:127.0.0.1:9999
