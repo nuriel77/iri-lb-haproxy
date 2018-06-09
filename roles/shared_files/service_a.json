@@ -12,7 +12,7 @@
   "Check": {
     "id": "10.10.0.110:15265",
     "name": "API 10.10.0.110:15265",
-    "args": ["/usr/local/bin/node_check.sh", "-a", "http://10.10.0.110:15265", "-i"],
+    "args": ["/scripts/node_check.sh", "-a", "http://10.10.0.110:15265", "-i"],
     "Interval": "30s",
     "timeout": "5s",
     "DeregisterCriticalServiceAfter": "1m"
