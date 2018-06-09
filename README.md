@@ -39,6 +39,8 @@ This PoC playbook will install some packages on the system to allow it to operat
 
 ## Installation
 
+To install Ansible see https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html
+
 Clone the repository:
 ```sh
 git clone https://github.com/nuriel77/iri-lb-haproxy.git && cd iri-lb-haproxy
