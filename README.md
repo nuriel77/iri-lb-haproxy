@@ -8,6 +8,22 @@ The configuration backend is Consul. Consul's configuration enables 'watch event
 
 See Consul's documentation for more information about it: https://www.consul.io/docs/index.html
 
+
+## Table of contents
+
+  * [Requirements](#requirements)
+  * [Warning](#warning)
+  * [Installation](#installation)
+  * [Uninstall](#uninstall)
+  * [Controlling Consul and Haproxy](#controlling-consul-and-haproxy)
+  * [Overview](#overview)
+  * [HAProxy](#haproxy)
+    * [Commands](#commands)
+  * [Consul](#consul)
+    * [Commands](#commands)
+  * [Service JSON Files](#service-json-files)
+  * [Status](#status)
+
 ## Requirements
 
 In order to use this PoC you must have the following installed on your server:
