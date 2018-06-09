@@ -1,3 +1,9 @@
+# Haproxy docker image
+haproxy_image: haproxy
+
+# Haproxy image tag
+haproxy_tag: 1.8.9
+
 # consul watch handler
 consul_haproxy_handler: /usr/local/bin/consul_haproxy_handler.py
 

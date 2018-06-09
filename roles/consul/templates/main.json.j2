@@ -1,6 +1,5 @@
 {
   "datacenter": "{{ default_dc }}",
-  "data_dir": "{{ consul_data_dir }}",
   "domain": "{{ default_domain }}",
   "encrypt": "{{ consul_key_data.stdout }}",
   "log_level": "{{ consul_debug_level }}",
@@ -12,22 +11,21 @@
   "start_join": [{% for host in groups['consul'] %}"{{ host }}"{% if not loop.last %},{% endif %}{% endfor %}],
   "bootstrap_expect": {{ groups['consul'] | length }},
 {% endif %}
-  "enable_syslog": true,
   "leave_on_terminate": true,
   "rejoin_after_leave": true,
   "server": true,
-  "bind_addr": "{{ consul_ip }}",
-  "advertise_addr": "{{ consul_ip }}",
-  "client_addr": "{{ consul_ip }}",
+  "bind_addr": "{{ consul_ip|default('127.0.0.1') }}",
+  "advertise_addr": "{{ consul_ip|default('127.0.0.1') }}",
+  "client_addr": "{{ consul_ip|default('127.0.0.1') }}",
 {% if consul_default_key_file is defined and consul_default_cert_file is defined and consul_default_ca_file is defined %}
   "addresses": {
     "https": "0.0.0.0"
   },
 {% endif %}
-  "advertise_addr_wan": "{{ consul_ip }}",
+  "advertise_addr_wan": "{{ consul_ip|default('127.0.0.1') }}",
 {% if consul_default_key_file is defined and consul_default_cert_file is defined and consul_default_ca_file is defined %}
   "ports": {
-    "https": {{ consul_ssl_port }}
+    "https": {{ consul_ssl_port|default('8443') }}
   },
   "key_file": "{{ consul_default_key_file }}",
   "cert_file": "{{ consul_default_cert_file }}",
@@ -48,13 +46,13 @@
       "service": "{{ lb_service_name }}",
       "handler_type": "script",
       "passingonly": true,
-      "args": ["/usr/bin/python", "{{ consul_haproxy_handler }}"]
+      "args": ["/usr/bin/python", "/scripts/consul_haproxy_handler.py", "-c", "/config/handler.yml"]
     },
     {
       "type": "checks",
       "service": "{{ lb_service_name }}",
       "handler_type" : "script",
-      "args": ["/usr/bin/python", "{{ consul_haproxy_handler }}"]
+      "args": ["/usr/bin/python", "/scripts/consul_haproxy_handler.py", "-c", "/config/handler.yml"]
     }
   ],
   "acl_datacenter": "{{ default_dc }}",

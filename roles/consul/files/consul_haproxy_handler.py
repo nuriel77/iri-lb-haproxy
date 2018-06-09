@@ -45,6 +45,7 @@ def send_haproxy_command(command):
             haproxy_sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         else:
             haproxy_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            args.haproxy_server = tuple(args.haproxy_server)
 
         haproxy_sock.settimeout(args.socket_connect_timeout)
         try:

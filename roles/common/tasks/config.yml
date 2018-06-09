@@ -7,3 +7,16 @@
     - journald
   notify:
     - restart journald
+
+- name: Uninstall docker-py
+  pip:
+    name: docker-py
+    state: absent
+
+- name: install python deps via pip
+  pip:
+    name: "{{ item }}"
+    state: forcereinstall
+  with_items:
+    - docker
+    - docker-compose

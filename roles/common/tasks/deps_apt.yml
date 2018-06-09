@@ -8,6 +8,7 @@
 - name: Install some packages
   apt: state=latest name={{ item }} update_cache=yes
   with_items:
+    - python-pip
     - ufw
     - wget
     - lsof

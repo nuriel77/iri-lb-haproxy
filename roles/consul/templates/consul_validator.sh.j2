@@ -1,8 +1,0 @@
-#!/bin/bash
-
-FILE=$1
-cp "$FILE" "$FILE.json"
-{{ consul_bin_dir }}/consul validate "$FILE.json"
-RC=$?
-rm "$FILE.json"
-exit $RC

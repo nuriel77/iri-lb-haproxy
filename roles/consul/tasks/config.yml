@@ -1,12 +1,14 @@
-- name: set consul download url
-  set_fact:
-    consul_url: "https://releases.hashicorp.com/consul/{{ consul_version }}/consul_{{ consul_version }}_linux_amd64.zip"
+#- name: set consul download url
+#  set_fact:
+#    consul_url: "https://releases.hashicorp.com/consul/{{ consul_version }}/consul_{{ consul_version }}_linux_amd64.zip"
 
+# If running a cluster of Consul, use default interface's IP
 - name: set interface ip
   set_fact:
     consul_ip: hostvars[inventory_hostname]['ansible_default_ipv4']['address'] 
   when: groups['consul'] | length > 1
 
+# If running on a single machine, use localhost
 - name: set local ip
   set_fact:
     consul_ip: 127.0.0.1
@@ -45,52 +47,12 @@
     - "{{ consul_config_dir }}/conf.d"
     - "{{ consul_data_dir }}"
 
-- name: check consul binary exists
-  stat:
-    path: "{{ consul_bin_dir }}/consul"
-  register: consul_binary
-
-- name: extract consul from zip
-  unarchive:
-    src: "{{ consul_url }}"
-    dest: "{{ consul_bin_dir }}/"
-    remote_src: yes
-    mode: 0750
-    group: consul
-    owner: root
-  when: not consul_binary.stat.exists
-  register: consul_download
-
-- name: get consul binary checksum
-  stat:
-    path: "{{ consul_bin_dir }}/consul"
-    checksum_algorithm: sha256
-  register: consul_sha
-
-- name: validate consul checksum
-  assert:
-    that: "'{{ consul_binary_checksum }}' == consul_sha.stat.checksum"
-  when: consul_download.changed
-
-- name: ensure consul binary ownership and mode
-  file:
-    path: "{{ consul_bin_dir }}/consul"
-    owner: consul
-    group: consul
-    mode: 0750
-  when: not consul_download.changed
-
-- name: copy consul environment file
-  copy:
-    src: files/sysconfig.consul
-    dest: /etc/sysconfig/consul
-
 - name: copy consul systemd file
   template:
     src: templates/consul.service.j2
     dest: /etc/systemd/system/consul.service
   notify:
-    - reload systemd
+    - restart consul
 
 - name: check consul key exists
   run_once: yes
@@ -103,6 +65,7 @@
 - name: create a new encryption key
   run_once: yes
   shell: "{{ consul_bin_dir }}/consul keygen > {{ consul_config_dir }}/{{ consul_key_file }}"
+  no_log: yes
   when: not consul_key.stat.exists
   tags:
     - consul_tokens
@@ -122,6 +85,7 @@
   shell: "echo -n $(cat {{ consul_config_dir }}/{{ consul_key_file }})"
   register: consul_key_data
   changed_when: false
+  no_log: yes
   tags:
     - consul_tokens
 
@@ -136,6 +100,7 @@
 - name: create a new master token
   run_once: yes
   shell: "uuidgen > {{ consul_config_dir }}/{{ consul_master_token_file }}"
+  no_log: yes
   when: consul_token.stat.exists == False
   tags:
     - consul_tokens
@@ -154,15 +119,18 @@
   run_once: yes
   shell: "echo -n $(cat {{ consul_config_dir }}/{{ consul_master_token_file }})"
   register: consul_master_token
+  no_log: yes
   changed_when: false
   tags:
     - consul_tokens
 
-- name: copy validation script
-  template:
-    src: templates/consul_validator.sh.j2
-    dest: "{{ consul_bin_dir }}/consul_validator.sh"
-    mode: 0700
+- name: build consul image
+  docker_image:
+    path: "{{ playbook_dir }}/roles/consul/files/docker"
+    name: "{{ consul_image }}"
+    tag: "{{ consul_tag }}"
+  tags:
+    - docker_build
 
 - name: copy consul configuration files
   template:
@@ -170,8 +138,7 @@
     dest: "{{ consul_config_dir }}/conf.d/{{ item }}"
     owner: "{{ consul_username }}"
     group: "{{ consul_username }}"
-    mode: 0600
-    validate: "{{ consul_bin_dir }}/consul_validator.sh %s"
+    mode: 0644
   with_items:
     - main.json
   notify: restart consul
@@ -182,10 +149,12 @@
   template:
     src: "templates/consul-haproxy-config.yml.j2"
     dest: "{{ consul_config_dir }}/handler-config.yml"
-    mode: 0640
+    mode: 0644
     owner: root
     group: "{{ consul_username }}"
     force: "{{ overwrite | default('no') }}"
+  tags:
+    - handler_config
 
 - name: flush handlers
   meta: flush_handlers
@@ -195,16 +164,3 @@
     name: consul.service
     state: started
     enabled: true
-
-- name: add some consul env variables to bashrc
-  blockinfile:
-    path: /root/.bashrc
-    block: |
-      export CONSUL_HTTP_ADDR={{ consul_ip }}:{{ consul_comm_port }}
-      export CONSUL_HTTP_SSL=false
-      export CONSUL_HTTP_TOKEN={{ consul_master_token.stdout }}
-      export PATH=$PATH:{{ consul_bin_dir }}
-      export NODE_NAME=$(hostname -I)
-    marker: "# {mark} ANSIBLE MANAGED BLOCK"
-  tags:
-    - bashrc

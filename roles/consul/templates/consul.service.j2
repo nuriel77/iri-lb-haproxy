@@ -1,21 +1,25 @@
 [Unit]
-Description=consul agent
-Requires=network-online.target
-After=network-online.target
+Description=Consul
+After=docker.service
+Requires=docker.service
 
 [Service]
-EnvironmentFile=-/etc/sysconfig/consul
-Restart=on-failure
-ExecStart={{ consul_bin_dir }}/consul agent $OPTIONS -config-dir={{ consul_config_dir }}/conf.d
-ExecReload=/bin/kill -HUP $MAINPID
-ExecStop={{ consul_bin_dir }}/consul leave
-User={{ consul_username }}
+TimeoutStartSec=0
+Restart=always
+ExecStartPre=-/usr/bin/docker rm %p
+ExecStart=/usr/bin/docker run \
+  --name %p \
+  --hostname %p \
+  --net=host \
+  --pid=host \
+  -v {{ consul_config_dir }}/handler-config.yml:/config/handler.yml:ro,Z \
+  -v /usr/local/bin:/scripts:ro,Z \
+  -v {{ consul_data_dir }}/data:/consul/data:rw,Z \
+  -v {{ consul_config_dir }}/conf.d:/consul/config:Z \
+  {{ consul_image }}:{{ consul_tag }} agent
 
-# Restrict process
-PrivateDevices=yes
-PrivateTmp=yes
-ProtectSystem=full
-ProtectHome=yes
+ExecStop=/usr/bin/docker stop %p
+ExecReload=/usr/bin/docker restart %p
 
 [Install]
 WantedBy=multi-user.target

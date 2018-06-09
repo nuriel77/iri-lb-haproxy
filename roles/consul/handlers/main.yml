@@ -3,6 +3,4 @@
     name: consul.service
     state: restarted
     enabled: yes
-
-- name: reload systemd
-  command: systemctl daemon-reload
+    daemon_reload: yes
