@@ -1,0 +1,4 @@
+- import_tasks: role.yml
+  tags:
+    - common_role
+  when: install_docker is defined and install_docker

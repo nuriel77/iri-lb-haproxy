@@ -1,0 +1,27 @@
+- import_tasks: setup_apt.yml
+  tags:
+    - common_setup_apt
+  when: ansible_distribution == 'Ubuntu'
+
+- import_tasks: setup_yum.yml
+  tags:
+    - common_setup_yum
+  when: ansible_distribution == 'CentOS'
+
+- import_tasks: install.yml
+  tags:
+    - common_install
+
+- import_tasks: firewalld.yml
+  tags:
+    - common_firewalld
+  when:
+    - configure_firewall is defined and configure_firewall
+    - ansible_distribution == 'CentOS'
+
+- import_tasks: ufw.yml
+  tags:
+    - common_ufw
+  when:
+    - configure_firewall is defined and configure_firewall
+    - ansible_distribution == 'Ubuntu'

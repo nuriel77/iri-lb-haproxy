@@ -12,11 +12,10 @@ See Consul's documentation for more information about it: https://www.consul.io/
 
 In order to use this PoC you must have the following installed on your server:
 
-* Docker
 * Ansible (>=2.4)
 * CentOS (>=7.4) or Ubuntu (>=16.04)
 
-You can optionally use this Ansible playbook to get Docker intsalled on your server: https://github.com/geerlingguy/ansible-role-git
+If you don't have Docker installed, you can use the playbook to install it. See the "Installation" chapter below.
 
 ## Warning
 
@@ -33,10 +32,19 @@ Variable files are located in `group_vars/all/*.yml`. If you want to edit any of
 . For example: `group_vars/all/z-override.yml` will be loaded last and override any previously configured variables.
 
 
-Run the playbook:
+For a simple installation, run the playbook:
 ```sh
 ansible-playbook -i inventory -v site.yml
 ```
+
+If you want the playbook to install docker for you, add the option `-e install_docker=true`:
+```sh
+ansible-playbook -i inventory -v site.yml -e install_docker=true
+```
+
+If you want the playbook to configure the firewall, add the option `-e configure_firewall=true`.
+
+
 
 ## Uninstall
 

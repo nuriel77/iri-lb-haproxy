@@ -3,6 +3,7 @@
   become_method: sudo
   roles:
     - common
+    - docker
 
 - hosts: consul
   become: true
