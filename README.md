@@ -23,6 +23,8 @@ See Consul's documentation for more information about it: https://www.consul.io/
     * [Commands](#commands)
   * [Service JSON Files](#service-json-files)
   * [Status](#status)
+  * [Appendix](#appendix)
+    * [Run with Docker Compose](#run-with-docker-compose)
 
 ## Requirements
 
@@ -38,6 +40,8 @@ If you don't have Docker installed, you can use the playbook to install it. See 
 This PoC playbook will install some packages on the system to allow it to operate and configure the services properly. **Do not use this installation on a production service!**
 
 ## Installation
+
+There are two ways to get up and running. The best and most complete is via Ansible. The second is building the Consul container yourself and running via the provided docker-compose.yml file. See the Appendix chapter for more information on running via Docker Compose.
 
 To install Ansible see https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html
 
@@ -348,3 +352,27 @@ If the node becomes unhealthy or de-registered in Consul, the status will turn f
 If a new node is registered and has no more available slots it will take the slot of other nodes in MAINT status.
 
 There is no problem to assign a large number of available slots (up to thousands) if you want to serve that many nodes. This can be configured via the playbook in `group_vars/all/all.yml` under `max_pow_backend_slots` and `max_backend_slots`.
+
+## Appendix
+
+### Run with Docker Compose
+
+To avoid installing dependencies you can also run the containers using Docker Compose. See the provided `docker-compose.yml` file.
+
+You will have to build at least the Consul container because it is customized to support some additional dependencies:
+
+Enter the directory `roles/consul/files/docker` and run:
+
+```sh
+docker build -t consul:latest .
+```
+This will make the Consul image ready.
+
+To run the containers, in the main folder, simply execute:
+```sh
+docker-compose up -d
+```
+or
+```sh
+docker-compose stop
+```

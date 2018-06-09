@@ -1,0 +1,31 @@
+version: "3.1"
+
+services:
+  consul:
+    image: consul:latest
+    container_name: consul
+    hostname: consul
+    restart: unless-stopped
+    volumes:
+      - /etc/consul/handler-config.yml:/config/handler.yml:ro,Z
+      - /usr/local/bin:/scripts:ro,Z
+      - /var/lib/consul/data:/consul/data:rw,Z
+      - /etc/consul/conf.d:/consul/config:Z
+      - /etc/localtime:/etc/localtime:ro
+    command:
+      - "agent"
+    network_mode: "host"
+
+  caddy:
+    image: haproxy:1.8.9
+    container_name: haproxy
+    hostname: haproxy
+    restart: unless-stopped
+    volumes:
+      - /etc/haproxy:/usr/local/etc/haproxy:ro,Z
+      - /dev/log:/dev/log:Z
+      - /etc/ssl:/etc/ssl:ro,Z
+      - /etc/letsencrypt:/etc/letsencrypt:ro,Z
+    network_mode: "host"
+    depends_on:
+      - consul
