@@ -7,6 +7,9 @@ ENV CONSUL_VERSION=1.1.0
 # This is the location of the releases.
 ENV HASHICORP_RELEASES=https://releases.hashicorp.com
 
+# GPG Key
+ENV GPG_KEYS=91A6E7F85D05C65630BEF18951852D87348FFC4C
+
 # Create a consul user and group first so the IDs get set the same way, even as
 # the rest of this may change over time.
 RUN addgroup consul && \
@@ -15,7 +18,9 @@ RUN addgroup consul && \
 # Set up certificates, base tools, and Consul.
 RUN set -eux && \
     apk add --no-cache ca-certificates curl dumb-init gnupg libcap openssl su-exec jq bash python python-dev py-pip && \
-    gpg --keyserver pgp.mit.edu --recv-keys 91A6E7F85D05C65630BEF18951852D87348FFC4C && \
+    ( gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$GPG_KEYS" \
+     || gpg --keyserver pgp.mit.edu --recv-keys "$GPG_KEYS" \
+     || gpg --keyserver keyserver.pgp.com --recv-keys "$GPG_KEYS" ) && \
     mkdir -p /tmp/build && \
     cd /tmp/build && \
     apkArch="$(apk --print-arch)" && \
