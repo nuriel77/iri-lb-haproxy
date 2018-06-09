@@ -6,6 +6,79 @@ Using HAProxy's new server template syntax: https://www.haproxy.com/blog/dynamic
 
 The configuration backend is Consul. Consul's configuration enables 'watch events' which calls a handler. The handler is a Python script which adds/updates/removes backends from HAProxy.
 
+See Consul's documentation for more information about it: https://www.consul.io/docs/index.html
+
+## Requirements
+
+In order to use this PoC you must have the following installed on your server:
+
+* Docker
+* Ansible (>=2.4)
+* CentOS (>=7.4) or Ubuntu (>=16.04)
+
+You can optionally use this Ansible playbook to get Docker intsalled on your server: https://github.com/geerlingguy/ansible-role-git
+
+## Warning
+
+This PoC playbook will install some packages on the system to allow it to operate and configure the services properly. **Do not use this installation on a production service!**
+
+## Installation
+
+Clone the repository:
+```sh
+git clone https://github.com/nuriel77/iri-lb-haproxy.git && cd iri-lb-haproxy
+```
+
+Variable files are located in `group_vars/all/*.yml`. If you want to edit any of those it is recommended to create variable override files, prefixed with `z-...`
+. For example: `group_vars/all/z-override.yml` will be loaded last and override any previously configured variables.
+
+
+Run the playbook:
+```sh
+ansible-playbook -i inventory -v site.yml
+```
+
+## Uninstall
+
+Uninstall is best effort. It will remove all configured files, users, data directories, services, docker containers and images.
+
+```sh
+ansible-playbook -i inventory site.yml -v --tags=uninstall -e uninstall_playbook=yes
+```
+
+## Controlling Consul and Haproxy
+
+The playbook should start Consul and Haproxy for you.
+
+To control a service (stop/restart/reload/stop) use the following syntax, e.g:
+
+```sh
+systemctl stop consul
+```
+
+or
+
+```sh
+systemctl reload haproxy
+```
+
+To view logs use the following syntax:
+```sh
+journalctl -u haproxy -e
+```
+You can add the flag `-f` so the logs are followed live.
+
+
+## Overview
+
+Consul holds a registry of services. The services can be, in our example, IRI nodes. We register the IRI nodes in Consul using its API and add a health check.
+
+We are able to add some meta-tags which are going to help control a configuration per IRI node, for example, whether to check if this node has PoW, whether we should authenticate to it via HTTPS, define timeout, max connections and so on.
+
+Once a service is registered Consul begins to run periodic health checks (defined by our custom script). If the health check is successful or failed will determine if HAProxy keeps it in its pool as a valid node to proxy traffic to.
+
+Consul uses a "watch" handler. This is a Python script that reads the services (and respective health check status) from Consul and configures HAProxy accordingly.
+
 ## HAProxy
 
 HAProxy is configured by default with 2 backends:
@@ -31,6 +104,11 @@ Consul exposes a simple API to register services and healthchecks. Each register
 On each service registry type event in Consul the Python script is called. It ensures the state is of the services in Consul are reflected in HAProxy's configuration. It communicates with HAProxy via HAProxy's API socket.
 
 ### Commands
+
+Export the Consul master token to a variable so it can be reused when using curl:
+```sh
+export CONSUL_HTTP_TOKEN=$(cat /etc/consul/consul_master_token)
+```
 
 Example view all registered services on catalog (Consul cluster) level:
 ```sh
