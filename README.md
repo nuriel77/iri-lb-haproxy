@@ -267,3 +267,41 @@ Example using hostname, the ID must be the resolvable IP of the node's name `nod
   }
 }
 ```
+
+## Status
+
+You can view the status of the backends by querying the HAProxy socket:
+
+```sh
+# echo "show stat" | socat stdio tcp4-connect:127.0.0.1:9999
+# pxname,svname,qcur,qmax,scur,smax,slim,stot,bin,bout,dreq,dresp,ereq,econ,eresp,wretr,wredis,status,weight,act,bck,chkfail,chkdown,lastchg,downtime,qlimit,pid,
+iid,sid,throttle,lbtot,tracked,type,rate,rate_lim,rate_max,check_status,check_code,check_duration,hrsp_1xx,hrsp_2xx,hrsp_3xx,hrsp_4xx,hrsp_5xx,hrsp_other,hanafai
+l,req_rate,req_rate_max,req_tot,cli_abrt,srv_abrt,comp_in,comp_out,comp_byp,comp_rsp,lastsess,last_chk,last_agt,qtime,ctime,rtime,ttime,agent_status,agent_code,a
+gent_duration,check_desc,agent_desc,check_rise,check_fall,check_health,agent_rise,agent_fall,agent_health,addr,cookie,mode,algo,conn_rate,conn_rate_max,conn_tot,
+intercepted,dcon,dses,
+iri_front,FRONTEND,,,0,0,360,0,0,0,0,0,0,,,,,OPEN,,,,,,,,,1,2,0,,,,0,0,0,0,,,,0,0,0,0,0,0,,0,0,0,,,0,0,0,0,,,,,,,,,,,,,,,,,,,,,http,,0,0,0,0,0,0,
+iri_pow_back,irisrv1,0,0,0,0,1,0,0,0,,0,,0,0,0,0,MAINT,1,1,0,0,0,17,17,,1,3,1,,0,,2,0,,0,,,,0,0,0,0,0,0,,,,,0,0,,,,,-1,,,0,0,0,0,,,,,,,,,,,,10.20.30.40:80,,http,
+,,,,,,,
+iri_pow_back,irisrv2,0,0,0,0,1,0,0,0,,0,,0,0,0,0,MAINT,1,1,0,0,0,17,17,,1,3,2,,0,,2,0,,0,,,,0,0,0,0,0,0,,,,,0,0,,,,,-1,,,0,0,0,0,,,,,,,,,,,,10.20.30.40:80,,http,
+,,,,,,,
+iri_pow_back,irisrv3,0,0,0,0,1,0,0,0,,0,,0,0,0,0,MAINT,1,1,0,0,0,17,17,,1,3,3,,0,,2,0,,0,,,,0,0,0,0,0,0,,,,,0,0,,,,,-1,,,0,0,0,0,,,,,,,,,,,,10.20.30.40:80,,http,
+,,,,,,,
+iri_pow_back,BACKEND,0,0,0,0,180,0,0,0,0,0,,0,0,0,0,DOWN,0,0,0,,0,17,17,,1,3,0,,0,,1,0,,0,,,,0,0,0,0,0,0,,,,0,0,0,0,0,0,0,-1,,,0,0,0,0,,,,,,,,,,,,,,http,source,,
+,,,,,
+iri_back,irisrv1,0,0,0,0,,0,0,0,,0,,0,0,0,0,MAINT,1,1,0,0,0,17,17,,1,4,1,,0,,2,0,,0,,,,0,0,0,0,0,0,,,,,0,0,,,,,-1,,,0,0,0,0,,,,,,,,,,,,10.20.30.40:80,,http,,,,,,
+,,
+iri_back,irisrv2,0,0,0,0,7,0,0,0,,0,,0,0,0,0,UP 1/4,1,1,0,0,0,17,0,,1,4,2,,0,,2,0,,0,INI,,,0,0,0,0,0,0,,,,,0,0,,,,,-1,,,0,0,0,0,,,,Initializing,,2,4,2,,,,10.10.10.110:15265,,http,,,,,,,,
+iri_back,irisrv3,0,0,0,0,,0,0,0,,0,,0,0,0,0,MAINT,1,1,0,0,0,17,17,,1,4,3,,0,,2,0,,0,,,,0,0,0,0,0,0,,,,,0,0,,,,,-1,,,0,0,0,0,,,,,,,,,,,,10.20.30.40:80,,http,,,,,,
+,,
+iri_back,BACKEND,0,0,0,0,180,0,0,0,0,0,,0,0,0,0,UP,1,1,0,,0,17,0,,1,4,0,,0,,1,0,,0,,,,0,0,0,0,0,0,,,,0,0,0,0,0,0,0,-1,,,0,0,0,0,,,,,,,,,,,,,,http,source,,,,,,,
+stats,FRONTEND,,,0,0,720,0,0,0,0,0,0,,,,,OPEN,,,,,,,,,1,5,0,,,,0,0,0,0,,,,0,0,0,0,0,0,,0,0,0,,,0,0,0,0,,,,,,,,,,,,,,,,,,,,,http,,0,0,0,0,0,0,
+stats,BACKEND,0,0,0,0,72,0,0,0,0,0,,0,0,0,0,UP,0,0,0,,0,17,,,1,5,0,,0,,1,0,,0,,,,0,0,0,0,0,0,,,,0,0,0,0,0,0,0,-1,,,0,0,0,0,,,,,,,,,,,,,,http,roundrobin,,,,,,,
+```
+
+What you see above are all the reserved slots (in this case just 3 per backend). On the `iri_back` (default backend) there's one new registered service which is being initialized. HAProxy by default runs 4 checks to verify the node is healthy (this is in addition to Consul's checks).
+
+If the node becomes unhealthy or de-registered in Consul, the status will turn from UP to MAINT (the slots stays reserved for this node in case it returns to a healthy state).
+
+If a new node is registered and has no more available slots it will take the slot of other nodes in MAINT status.
+
+There is no problem to assign a large number of available slots (up to thousands) if you want to serve that many nodes. This can be configured via the playbook in `group_vars/all/all.yml` under `max_pow_backend_slots` and `max_backend_slots`.

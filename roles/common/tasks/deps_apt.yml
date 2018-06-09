@@ -18,3 +18,4 @@
     - htop
     - openssl
     - unzip
+    - socat
