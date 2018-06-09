@@ -47,6 +47,14 @@
     - "{{ consul_config_dir }}/conf.d"
     - "{{ consul_data_dir }}"
 
+- name: build consul image
+  docker_image:
+    path: "{{ playbook_dir }}/roles/consul/files/docker"
+    name: "{{ consul_image }}"
+    tag: "{{ consul_tag }}"
+  tags:
+    - docker_build
+
 - name: copy consul systemd file
   template:
     src: templates/consul.service.j2
@@ -64,7 +72,7 @@
 
 - name: create a new encryption key
   run_once: yes
-  shell: "{{ consul_bin_dir }}/consul keygen > {{ consul_config_dir }}/{{ consul_key_file }}"
+  shell: "/usr/bin/docker run --name tempconsul --rm consul:latest consul keygen > {{ consul_config_dir }}/{{ consul_key_file }}"
   no_log: yes
   when: not consul_key.stat.exists
   tags:
@@ -123,14 +131,6 @@
   changed_when: false
   tags:
     - consul_tokens
-
-- name: build consul image
-  docker_image:
-    path: "{{ playbook_dir }}/roles/consul/files/docker"
-    name: "{{ consul_image }}"
-    tag: "{{ consul_tag }}"
-  tags:
-    - docker_build
 
 - name: copy consul configuration files
   template:

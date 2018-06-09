@@ -1,13 +1,3 @@
-- import_tasks: deps_apt.yml
-  tags:
-    - lb_deps_apt
-  when: ansible_distribution == 'Ubuntu'
-
-- import_tasks: deps_yum.yml
-  tags:
-    - lb_deps_yum
-  when: ansible_distribution == 'CentOS'
-
 - import_tasks: install.yml
   tags:
     - lb_install

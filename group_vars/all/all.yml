@@ -23,6 +23,12 @@ lb_bind_address: 0.0.0.0
 # This will be the external accessible port
 iri_api_port_remote: 14267
 
+# Haproxy enable https
+haproxy_https: true
+
+# Haproxy stats port with https
+haproxy_stats_https: false
+
 # Load balancer max connections (all backends)
 lb_max_connections: 720
 

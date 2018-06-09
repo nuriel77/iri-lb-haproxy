@@ -11,8 +11,5 @@
     state: reloaded
     enabled: yes
 
-- name: restart rsyslog
-  systemd:
-    name: rsyslog
-    state: restarted
-    enabled: yes
+- name: reload systemd
+  command: systemctl daemon-reload

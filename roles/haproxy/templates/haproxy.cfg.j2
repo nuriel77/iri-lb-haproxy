@@ -1,7 +1,7 @@
 global
-    chroot /var/lib/haproxy
-    user haproxy
-    group haproxy
+    #chroot /var/lib/haproxy
+    #user haproxy
+    #group haproxy
     log /dev/log local0 debug
     tune.ssl.default-dh-param 2048
     ssl-server-verify none
@@ -184,8 +184,10 @@ backend iri_back
     server-template irisrv 1-{{ max_backend_slots|default('10') }} 10.20.30.40:80 check disabled
 
 listen stats
-    bind {{ haproxy_stats_address }}:{{ haproxy_stats_port }} ssl crt {{ ssl_certkey_file }}
+    bind {{ haproxy_stats_address }}:{{ haproxy_stats_port }}{% if haproxy_stats_https is defined and haproxy_stats_https|bool %}ssl crt {{ ssl_certkey_file }}
     reqadd X-Forwarded-Proto:\ https
+{% endif %}
+
     mode http
     timeout client 1h
     stats enable

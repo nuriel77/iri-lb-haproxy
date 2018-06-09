@@ -342,8 +342,12 @@ def process_services():
     #pprint(haproxy_pow_backend)
     #print("DEF BE:")
     #pprint(haproxy_default_backend)
+
+    # Reserve first slot in each backend for static
+    # test configurations if needed (start from index 2 here)
     pow_slot = 2
     default_slot = 2
+
     for service in consul_services:
         server_addr = "%s:%s" % (service['ServiceAddress'], \
                                  service['ServicePort'])
