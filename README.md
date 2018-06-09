@@ -9,6 +9,13 @@ The configuration backend is Consul. Consul's configuration enables 'watch event
 See Consul's documentation for more information about it: https://www.consul.io/docs/index.html
 
 
+## TODO
+
+* Add more usage examples to the README / write a short blog with usage examples
+* Test support of certbot script with this installation
+* Test support of HTTPS backends (both verified and non-verified SSL endpoints)
+* Provide helper script to add/remove/update services (nodes)
+
 ## Table of contents
 
   * [Requirements](#requirements)
