@@ -62,9 +62,13 @@ If you want the playbook to install docker for you, add the option `-e install_d
 ansible-playbook -i inventory -v site.yml -e install_docker=true
 ```
 
+*NOTE* that with Ubuntu Bionic (18.04+) you need to add the option `-e docker_apt_release_channel=edge`!
+
 If you want the playbook to configure the firewall, add the option `-e configure_firewall=true`.
-
-
+```sh
+ansible-playbook -i inventory -v site.yml -e install_docker=true -e configure_firewall=true
+```
+*NOTE* that to specify an alternative SSH port use the option `-e ssh_port=[port number]`
 
 ## Uninstall
 
