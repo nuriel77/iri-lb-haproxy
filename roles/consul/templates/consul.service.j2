@@ -16,6 +16,7 @@ ExecStart=/usr/bin/docker run \
   -v /usr/local/bin:/scripts:ro,Z \
   -v {{ consul_data_dir }}/data:/consul/data:rw,Z \
   -v {{ consul_config_dir }}/conf.d:/consul/config:Z \
+  -v /etc/localtime:/etc/localtime:ro,Z \
   {{ consul_image }}:{{ consul_tag }} agent
 
 ExecStop=/usr/bin/docker stop %p

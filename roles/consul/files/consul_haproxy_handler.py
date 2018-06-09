@@ -26,6 +26,7 @@ def parse_args():
                         default='/etc/consul/handler-config.yml',
                         help='Config file. Default %(default)s')
 
+    # (TODO: Add logging)
     parser.add_argument('--debug', '-d',
                         action='store_true',
                         help='Enable debug')
