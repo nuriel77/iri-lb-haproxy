@@ -28,6 +28,7 @@ ExecStart=/usr/bin/docker run \
   {{ haproxy_image }}:{{ haproxy_tag }}
 ExecStartPost={{ consul_haproxy_handler }}
 ExecReload=/usr/bin/docker kill -s HUP %p
+ExecReload={{ consul_haproxy_handler }}
 ExecStop=/usr/bin/docker stop %p
 
 KillMode=mixed
