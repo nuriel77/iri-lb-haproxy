@@ -47,11 +47,30 @@
     - "{{ consul_config_dir }}/conf.d"
     - "{{ consul_data_dir }}"
 
-- name: build consul image
-  docker_image:
-    path: "{{ playbook_dir }}/roles/consul/files/docker"
-    name: "{{ consul_image }}"
-    tag: "{{ consul_tag }}"
+- name: docker build consul image
+  block:
+
+    - name: create temporary build directory
+      tempfile:
+        state: directory
+      register: tempdir
+
+    - name: copy Dockerfile
+      template:
+        src: templates/Dockerfile.j2
+        dest: "{{ tempdir.path }}/Dockerfile"
+
+    - name: build consul image
+      docker_image:
+        path: "{{ tempdir.path }}"
+        name: "{{ consul_image }}"
+        tag: "{{ consul_tag }}"
+
+    - name: remove temporary build dir
+      file:
+        state: absent
+        path: "{{ tempdir.path }}"
+
   tags:
     - docker_build
 

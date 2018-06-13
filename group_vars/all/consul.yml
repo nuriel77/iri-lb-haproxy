@@ -10,5 +10,7 @@ consul_key_file: consul.key
 consul_master_token_file: consul_master_token
 consul_agent_token_file: consul_agent_token
 consul_debug_level: DEBUG
-default_domain: my.domain
+default_domain: "{{ lb_service_name }}"
 default_dc: my_dc
+consul_dns_enabled: true
+consul_watches_enabled: false
