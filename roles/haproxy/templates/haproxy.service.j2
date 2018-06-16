@@ -20,19 +20,17 @@ ExecStart=/usr/bin/docker run \
   --hostname %p \
   --net=host \
   --pid=host \
+  --ulimit nofile={{ haproxy_nofile_limit }}:{{ haproxy_nofile_limit }} \
   -v /etc/haproxy:/usr/local/etc/haproxy:ro,Z \
   -v /dev/log:/dev/log:Z \
   -v /etc/ssl:/etc/ssl:ro,Z \
   -v /etc/letsencrypt:/etc/letsencrypt:ro,Z \
   -v /etc/localtime:/etc/localtime:ro,Z \
   {{ haproxy_image }}:{{ haproxy_tag }}
-ExecStartPost={{ consul_haproxy_handler }}
 ExecReload=/usr/bin/docker kill -s HUP %p
-ExecReload={{ consul_haproxy_handler }}
 ExecStop=/usr/bin/docker stop %p
 
 KillMode=mixed
-Restart=always
 
 [Install]
 WantedBy=multi-user.target

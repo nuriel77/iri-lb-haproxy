@@ -9,7 +9,6 @@
     - "{{ iri_api_port_remote }}"
   when: ansible_distribution == 'CentOS'
 
-
 - name: remove in lb rules from ufw
   block:
 

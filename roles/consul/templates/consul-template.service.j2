@@ -1,0 +1,32 @@
+[Unit]
+Description=Consul Template
+After=consul.service haproxy.service
+Requires=consul.service
+
+[Service]
+TimeoutStartSec=0
+Restart=always
+EnvironmentFile=-/etc/sysconfig/consul-template
+ExecStart={{ consul_template_basedir }}/consul-template \
+  -template=${HAPROXY_TEMPLATE}:${HAPROXY_CONFIG}:${HAPROXY_RELOAD} \
+  -log-level=${CONSUL_TEMPLATE_LOGLEVEL} \
+  -consul-addr=${CONSUL_ADDRESS} \
+  -reload-signal=SIGHUP
+ExecReload=/bin/kill -HUP $MAINPID
+
+# No need to mess with /dev
+PrivateDevices=yes
+
+# Dedicated /tmp
+PrivateTmp=yes
+
+# /home is not accessible at all
+ProtectHome=yes
+
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=consul-template
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

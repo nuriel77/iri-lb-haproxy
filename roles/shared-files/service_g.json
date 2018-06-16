@@ -1,0 +1,20 @@
+{
+  "ID": "x-vps.com:14267",
+  "Name": "iri",
+  "tags": [
+    "haproxy.maxconn=5",
+    "haproxy.scheme=https",
+    "haproxy.pow=false"
+  ],
+  "Address": "x-vps.com",
+  "Port": 14267,
+  "EnableTagOverride": false,
+  "Check": {
+    "id": "x-vps.com:14267",
+    "name": "API x-vps.com:14267",
+    "args": ["/bin/bash", "/scripts/node_check.sh", "-a", "https://x-vps.com:14267", "-i"],
+    "Interval": "30s",
+    "timeout": "5s",
+    "DeregisterCriticalServiceAfter": "24h"
+  }
+}

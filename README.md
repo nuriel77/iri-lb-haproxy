@@ -2,18 +2,18 @@
 
 This is initial work to create a HAPRoxy load balancer for IRI, which can also be deployed in a highly available setup.
 
-Using HAProxy's new server template syntax: https://www.haproxy.com/blog/dynamic-scaling-for-microservices-with-runtime-api/
-
-The configuration backend is Consul. Consul's configuration enables 'watch events' that calls a handler script. The handler is a Python script that adds/updates/removes backends from HAProxy.
+The configuration backend is Consul. In addition to consul, Consul Template binary is used to watch services in Consul and update Haproxy.
 
 See Consul's documentation for more information about it: https://www.consul.io/docs/index.html
+
+And Consul-Template: https://github.com/hashicorp/consul-template
 
 
 ## TODO
 
 * Add more usage examples to the README / write a short blog with usage examples
 * Test support of certbot script with this installation
-* Test support of HTTPS backends (both verified and non-verified SSL endpoints)
+* Test support of HTTPS backends client verification
 * Provide helper script to add/remove/update services (nodes)
 
 ## Table of contents
@@ -90,7 +90,7 @@ Uninstall is best effort. It will remove all configured files, users, data direc
 ansible-playbook -i inventory site.yml -v --tags=uninstall -e uninstall_playbook=yes
 ```
 
-## Controlling Consul and Haproxy
+## Controlling Consul, Consul-template and Haproxy
 
 The playbook should start Consul and Haproxy for you.
 
@@ -100,7 +100,13 @@ To control a service (stop/restart/reload/stop) use the following syntax, e.g:
 systemctl stop consul
 ```
 
-or
+consul-template:
+
+```sh
+systemctl restart consul-template
+```
+
+or haproxy:
 
 ```sh
 systemctl reload haproxy
@@ -117,11 +123,11 @@ You can add the flag `-f` so the logs are followed live.
 
 Consul holds a registry of services. The services can be, in our example, IRI nodes. We register the IRI nodes in Consul using its API and add a health check.
 
-We are able to add some meta-tags that are going to help control a configuration per IRI node, for example, whether to check if this node has PoW, whether we should authenticate to it via HTTPS, define timeout, max connections and so on.
+We are able to add some meta-tags that are going to help control a configuration per IRI node, for example, whether to check if this node has PoW, whether we should authenticate to it via HTTPS, define timeout, weight, max connections and so on.
 
 Once a service is registered Consul begins to run periodic health checks (defined by our custom script). If the health check is successful or failed will determine if HAProxy keeps it in its pool as a valid node to proxy traffic to.
 
-Consul uses a "watch" handler. This is a Python script that reads the services (and respective health check status) from Consul and configures HAProxy accordingly.
+Consul-template watches for any changes in consul (new/removed services, health check status etc) and updates haproxy's configuration if needed.
 
 ## HAProxy
 
@@ -131,7 +137,7 @@ HAProxy is configured by default with 2 backends:
 
 2. PoW backend (has a lower maxconn per backend to avoid PoW DoS)
 
-HAProxy has pre-assigned slots (can be any number, e.g. 1-2000 server slots per backend). The slots are being populated by the Python script when it detects new services registered in Consul. The Python script adds, removes or updates the HAProxy configuration.
+Consul-template uses a haproxy.cfg.tmpl file -- this file is configured on the fly and provided to haproxy.
 
 ### Commands
 
@@ -139,6 +145,15 @@ Example view stats from admin TCP socket:
 
 ```sh
 echo "show stat" | socat stdio tcp4-connect:127.0.0.1:9999
+```
+Alternatively, use a helper script:
+
+```sh
+show-stat
+```
+or
+```sh
+show-stat services
 ```
 
 ## Consul
@@ -212,7 +227,7 @@ Here is an example with some explanation:
 Here is an example of a service (IRI node) that supports PoW:
 ```
 {
-  "ID": "10.10.0.110:15265-pow", <--- *Note that we've appended `-pow` to the ID*
+  "ID": "10.10.0.110:15265",     <--- Service unique ID
   "Name": "my.loadbalancer.io",  <--- We always use the same service name to make sure this gets configured in Haproxy
   "tags": [
     "haproxy.maxconn=7",         <--- Max concurrent connections to this node
@@ -224,7 +239,7 @@ Here is an example of a service (IRI node) that supports PoW:
   "EnableTagOverride": false,
   "Check": {
     "id": "10.10.0.110:15265-pow",
-    "name": "API 10.10.0.110:15265-pow",
+    "name": "API 10.10.0.110:15265",
     "args": ["/scripts/node_check.sh", "-a", "http://10.10.0.110:15265", "-i", "-p"], <--- Note the `-p` in the arguments, that means we validate PoW works.
     "Interval": "30s",
     "timeout": "5s",
@@ -232,8 +247,6 @@ Here is an example of a service (IRI node) that supports PoW:
   }
 }
 ```
-
-* The reason we append `-pow` to the ID of a PoW enabled node is because you can also register the same IP:PORT on the default backend to serve non-PoW requests. This keeps the two definitions separated.
 
 A simple service's definition:
 ```
@@ -280,33 +293,11 @@ HTTPS enabled service/node:
 }
 ```
 
-*NOTE* that due to HAProxy DNS resolution it is problematic to register a node using only its domain name. Nodes running with dynamic DNS cannot be used.
-
-Example using hostname, the ID must be the resolvable IP of the node's name `node05.iotanode.io`:
-```
-{
-  "ID": "10.10.10.94:16265",
-  "Name": "my.loadbalancer.io",
-  "tags": [],
-  "Address": "10.10.10.94",
-  "Port": 16265,
-  "EnableTagOverride": false,
-  "Check": {
-    "id": "10.10.10.94:16265",
-    "name": "API http://node05.iotanode.io:16265",
-    "args": ["/usr/local/bin/node_check.sh", "-a", "http://node05.iotanode.io:16265", "-i", "-m", "1.4.1.7"],
-    "Interval": "30s",
-    "timeout": "5s",
-    "DeregisterCriticalServiceAfter": "1m"
-  }
-}
-```
-
 ## Status
 
 To view a compact view of HAProxy's current status run:
 ```sh
-echo "show stat" | socat stdio tcp4-connect:127.0.0.1:9999|egrep -v "FRONTEND|BACKEND|10.20.30.40:80" | cut -d, -f1,2,18,19,74
+show-stat
 ```
 
 This will result in something like:
@@ -319,47 +310,8 @@ iri_back,irisrv4,UP,1,80.61.194.94:16265
 ```
 We see the backend name, service slot name, status (UP or MAINT), the weight, IP address and port.
 
-When a service is in MAINT it means it has been disabled because either health check is failing or it has been de-registered from Consul.
+When a service is in MAINT it means it has been disabled because either health check is failing or explicitly set to maintenance mode.
 
-The above "long" command has been added to the file `roles/shared-files/show-stat` and can be run on the command-line using `shot-stat`.
-
-
-
-You can view the full status of the backends by querying the HAProxy socket:
-
-```sh
-# echo "show stat" | socat stdio tcp4-connect:127.0.0.1:9999
-# pxname,svname,qcur,qmax,scur,smax,slim,stot,bin,bout,dreq,dresp,ereq,econ,eresp,wretr,wredis,status,weight,act,bck,chkfail,chkdown,lastchg,downtime,qlimit,pid,
-iid,sid,throttle,lbtot,tracked,type,rate,rate_lim,rate_max,check_status,check_code,check_duration,hrsp_1xx,hrsp_2xx,hrsp_3xx,hrsp_4xx,hrsp_5xx,hrsp_other,hanafai
-l,req_rate,req_rate_max,req_tot,cli_abrt,srv_abrt,comp_in,comp_out,comp_byp,comp_rsp,lastsess,last_chk,last_agt,qtime,ctime,rtime,ttime,agent_status,agent_code,a
-gent_duration,check_desc,agent_desc,check_rise,check_fall,check_health,agent_rise,agent_fall,agent_health,addr,cookie,mode,algo,conn_rate,conn_rate_max,conn_tot,
-intercepted,dcon,dses,
-iri_front,FRONTEND,,,0,0,360,0,0,0,0,0,0,,,,,OPEN,,,,,,,,,1,2,0,,,,0,0,0,0,,,,0,0,0,0,0,0,,0,0,0,,,0,0,0,0,,,,,,,,,,,,,,,,,,,,,http,,0,0,0,0,0,0,
-iri_pow_back,irisrv1,0,0,0,0,1,0,0,0,,0,,0,0,0,0,MAINT,1,1,0,0,0,17,17,,1,3,1,,0,,2,0,,0,,,,0,0,0,0,0,0,,,,,0,0,,,,,-1,,,0,0,0,0,,,,,,,,,,,,10.20.30.40:80,,http,
-,,,,,,,
-iri_pow_back,irisrv2,0,0,0,0,1,0,0,0,,0,,0,0,0,0,MAINT,1,1,0,0,0,17,17,,1,3,2,,0,,2,0,,0,,,,0,0,0,0,0,0,,,,,0,0,,,,,-1,,,0,0,0,0,,,,,,,,,,,,10.20.30.40:80,,http,
-,,,,,,,
-iri_pow_back,irisrv3,0,0,0,0,1,0,0,0,,0,,0,0,0,0,MAINT,1,1,0,0,0,17,17,,1,3,3,,0,,2,0,,0,,,,0,0,0,0,0,0,,,,,0,0,,,,,-1,,,0,0,0,0,,,,,,,,,,,,10.20.30.40:80,,http,
-,,,,,,,
-iri_pow_back,BACKEND,0,0,0,0,180,0,0,0,0,0,,0,0,0,0,DOWN,0,0,0,,0,17,17,,1,3,0,,0,,1,0,,0,,,,0,0,0,0,0,0,,,,0,0,0,0,0,0,0,-1,,,0,0,0,0,,,,,,,,,,,,,,http,source,,
-,,,,,
-iri_back,irisrv1,0,0,0,0,,0,0,0,,0,,0,0,0,0,MAINT,1,1,0,0,0,17,17,,1,4,1,,0,,2,0,,0,,,,0,0,0,0,0,0,,,,,0,0,,,,,-1,,,0,0,0,0,,,,,,,,,,,,10.20.30.40:80,,http,,,,,,
-,,
-iri_back,irisrv2,0,0,0,0,7,0,0,0,,0,,0,0,0,0,UP 1/4,1,1,0,0,0,17,0,,1,4,2,,0,,2,0,,0,INI,,,0,0,0,0,0,0,,,,,0,0,,,,,-1,,,0,0,0,0,,,,Initializing,,2,4,2,,,,10.10.10.110:15265,,http,,,,,,,,
-iri_back,irisrv3,0,0,0,0,,0,0,0,,0,,0,0,0,0,MAINT,1,1,0,0,0,17,17,,1,4,3,,0,,2,0,,0,,,,0,0,0,0,0,0,,,,,0,0,,,,,-1,,,0,0,0,0,,,,,,,,,,,,10.20.30.40:80,,http,,,,,,
-,,
-iri_back,BACKEND,0,0,0,0,180,0,0,0,0,0,,0,0,0,0,UP,1,1,0,,0,17,0,,1,4,0,,0,,1,0,,0,,,,0,0,0,0,0,0,,,,0,0,0,0,0,0,0,-1,,,0,0,0,0,,,,,,,,,,,,,,http,source,,,,,,,
-stats,FRONTEND,,,0,0,720,0,0,0,0,0,0,,,,,OPEN,,,,,,,,,1,5,0,,,,0,0,0,0,,,,0,0,0,0,0,0,,0,0,0,,,0,0,0,0,,,,,,,,,,,,,,,,,,,,,http,,0,0,0,0,0,0,
-stats,BACKEND,0,0,0,0,72,0,0,0,0,0,,0,0,0,0,UP,0,0,0,,0,17,,,1,5,0,,0,,1,0,,0,,,,0,0,0,0,0,0,,,,0,0,0,0,0,0,0,-1,,,0,0,0,0,,,,,,,,,,,,,,http,roundrobin,,,,,,,
-```
-
-What you see above are all the reserved slots (in this case just 3 per backend). On the `iri_back` (default backend) there's one new registered service that is being initialized. HAProxy by default runs 4 checks to verify the node is healthy (this is in addition to Consul's checks).
-
-If the node becomes unhealthy or de-registered in Consul, the status will turn from UP to MAINT (the slots stays reserved for this node in case it returns to a healthy state).
-
-If a new node is registered and has no more available slots it will take the slot of other nodes in MAINT status.
-
-There is no problem to assign a large number of available slots (up to thousands) if you want to serve that many nodes. This can be configured via the playbook in `group_vars/all/all.yml` under `max_pow_backend_slots` and `max_backend_slots`.
 
 ## Appendix
 
@@ -399,7 +351,25 @@ HAproxy's systemd control file:
 /etc/systemd/system/haproxy.service
 ```
 
+Consul-template systemd file:
+```sh
+/etc/systemd/system/consul-template.service
+```
 
+Consul-template haproxy template
+```sh
+/etc/haproxy/haproxy.cfg.tmpl
+```
+
+Consul template binary:
+```sh
+/opt/consul-template/consul-template
+```
+
+Consul template plugin script
+```sh
+/opt/consul-template/consul-template-plugin.py
+```
 
 ### Run with Docker Compose
 
@@ -422,3 +392,5 @@ or
 ```sh
 docker-compose stop
 ```
+
+*NOTE* consul-template cannot be run in a container as it requires access to `systemctl` commands. For now it is best left to run as a binary on the host.

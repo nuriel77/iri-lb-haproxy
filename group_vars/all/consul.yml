@@ -1,8 +1,8 @@
+# Consul
 consul_image: consul
 consul_tag: latest
 consul_username: consul
 consul_config_dir: /etc/consul
-consul_bin_dir: /usr/local/bin
 consul_data_dir: /var/lib/consul
 consul_comm_port: 8500
 consul_ssl_port: 8443
@@ -12,3 +12,9 @@ consul_agent_token_file: consul_agent_token
 consul_debug_level: DEBUG
 default_domain: my.domain
 default_dc: my_dc
+consul_node_check: /usr/local/bin/node_check.sh
+
+# Consul template
+consul_template_version: 0.19.5
+consul_template_basedir: /opt/consul-template
+consul_template_plugin: "{{ consul_template_basedir }}/consul-template-plugin.py"
