@@ -31,13 +31,14 @@
   "cert_file": "{{ consul_default_cert_file }}",
   "ca_file": "{{ consul_default_ca_file }}",
 {% endif %}
-{% if consul_dns_enabled is defined and consul_dns_enabled %}
+{% if consul_dns_enabled is defined and consul_dns_enabled|bool == True %}
   "dns_config": {
     "allow_stale": true,
     "max_stale": "30s",
     "node_ttl": "30s",
     "enable_truncate": true,
-    "only_passing": true
+    "only_passing": true,
+    "udp_answer_limit": 100
   },
 {% endif %}
   "acl_datacenter": "{{ default_dc }}",

@@ -86,6 +86,12 @@ haproxy_min_version: 3
 # Create self signed certificate for haproxy
 create_selfsigned_cert: True
 
+# If set to `false`, the list of IPs below will be
+# written to the haproxy config and managed in
+# the haroxy config file only. If set to `true`,
+# the above file will be used to whitelist IPs.
+haproxy_use_whitelist_file: True
+
 # A list of IPs to whitelist on haproxy
 # This will allow those IPs to bypass command
 # regex limitations. The format is a yaml list
