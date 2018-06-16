@@ -1,13 +1,6 @@
 # IRI HAProxy Load-balancer
 
-This is initial work to create a HAPRoxy load balancer for IRI, which can also be deployed in a highly available setup.
-
-The configuration backend is Consul. In addition to consul, Consul Template binary is used to watch services in Consul and update Haproxy.
-
-See Consul's documentation for more information about it: https://www.consul.io/docs/index.html
-
-And Consul-Template: https://github.com/hashicorp/consul-template
-
+HAPRoxy load balancer for IRI nodes able to support highly available setups using Consul as a configuration backend.
 
 ## TODO
 
@@ -23,7 +16,7 @@ And Consul-Template: https://github.com/hashicorp/consul-template
   * [Installation](#installation)
   * [Uninstall](#uninstall)
   * [Controlling Consul and Haproxy](#controlling-consul-and-haproxy)
-  * [Overview](#overview)
+  * [How Does it Work](#how-does-it-work)
   * [HAProxy](#haproxy)
     * [Commands](#commands)
   * [Consul](#consul)
@@ -33,6 +26,22 @@ And Consul-Template: https://github.com/hashicorp/consul-template
   * [Appendix](#appendix)
     * [File Locations](#file-locations)
     * [Run with Docker Compose](#run-with-docker-compose)
+
+## Description
+
+Note: This solution is meant for private IRI nodes cluster.
+
+
+Using a distributed configuration backend ensures high availability and allows to scale up a cluster seamlessly. This also allows to scale up the number of load balancers to provide fault tolerance -- and load balancing -- of the load balancers themselves (e.g. via DNS round-robin).
+
+This solution is based on Consul and HAproxy, the latter being a robust, feature rich load balancer. In addition to Consul, Consul Template is used to watch services in Consul and update Haproxy.
+
+
+
+See Consul's documentation for more information about it: https://www.consul.io/docs/index.html
+
+And Consul-Template: https://github.com/hashicorp/consul-template
+
 
 ## Requirements
 
@@ -119,7 +128,7 @@ journalctl -u haproxy -e
 You can add the flag `-f` so the logs are followed live.
 
 
-## Overview
+## How Does it Work
 
 Consul holds a registry of services. The services can be, in our example, IRI nodes. We register the IRI nodes in Consul using its API and add a health check.
 
