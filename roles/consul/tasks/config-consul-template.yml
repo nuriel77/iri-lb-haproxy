@@ -8,6 +8,14 @@
     etc_config_dir: sysconfig
   when: ansible_distribution == 'CentOS'
 
+- name: ensure etc haproxy dir
+  file:
+    path: /etc/haproxy
+    state: directory
+    owner: root
+    group: "{{ haproxy_username }}"
+    mode: 0750
+
 - name: remove existing consul-template basedir
   file:
     path: "{{ consul_template_basedir }}"
