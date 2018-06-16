@@ -160,7 +160,7 @@ show-stat services
 
 Consul exposes a simple API to register services and healthchecks. Each registered service includes a healthcheck (a simple script) that concludes whether a service is healthy or not. Based on the service's health the backend becomes active or disabled in HAProxy.
 
-On each service registry type event in Consul the Python script is called. It ensures the state is of the services in Consul are reflected in HAProxy's configuration. It communicates with HAProxy via HAProxy's API socket.
+Consul Template listens to consul and processes any changes on key value store, services or their healthchecks. E.g. if a new service is added, consul template will reload HAProxy with the new service (IRI node). If a service's healthcheck is failing, consul template will reload HAproxy, removing the failed service.
 
 ### Commands
 
