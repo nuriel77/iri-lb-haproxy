@@ -39,7 +39,6 @@
   with_items:
     - "/var/lib/consul"
     - "/etc/consul"
-    - "{{ consul_haproxy_handler }}"
     - "{{ consul_node_check }}"
     - "{{ consul_template_basedir }}"
     - "/etc/haproxy/haproxy.cfg.tmpl"

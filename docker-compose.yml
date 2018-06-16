@@ -7,7 +7,6 @@ services:
     hostname: consul
     restart: unless-stopped
     volumes:
-      - /etc/consul/handler-config.yml:/config/handler.yml:ro,Z
       - /usr/local/bin:/scripts:ro,Z
       - /var/lib/consul/data:/consul/data:rw,Z
       - /etc/consul/conf.d:/consul/config:Z

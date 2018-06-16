@@ -317,15 +317,6 @@ When a service is in MAINT it means it has been disabled because either health c
 
 ### File Locations
 
-Python script that is called by Consul upon event changes (watch handler):
-```sh
-/usr/local/bin/consul_haproxy_handler.py
-```
-The above script uses this configuration file:
-```sh
-/etc/consul/handler-config.yml
-```
-
 Consul's configuration file:
 ```sh
 /etc/consul/conf.d/main.json
