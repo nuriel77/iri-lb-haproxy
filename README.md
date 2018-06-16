@@ -8,6 +8,8 @@ HAPRoxy load balancer for IRI nodes able to support highly available setups usin
 * Test support of certbot script with this installation
 * Test support of HTTPS backends client verification
 * Provide helper script to add/remove/update services (nodes)
+* Prometheus exporter for HAProxy
+* Centralized monitoring for backend nodes
 
 ## Table of contents
 
