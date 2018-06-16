@@ -42,6 +42,16 @@ See Consul's documentation for more information about it: https://www.consul.io/
 
 And Consul-Template: https://github.com/hashicorp/consul-template
 
+## How Does it Work
+
+Consul holds a registry of services. The services can be, in our example, IRI nodes. We register the IRI nodes in Consul using its API and add a health check.
+
+We are able to add some meta-tags that are going to help control a configuration per IRI node, for example, whether to check if this node has PoW, whether we should authenticate to it via HTTPS, define timeout, weight, max connections and so on.
+
+Once a service is registered Consul begins to run periodic health checks (defined by our custom script). If the health check is successful or failed will determine if HAProxy keeps it in its pool as a valid node to proxy traffic to.
+
+Consul-template watches for any changes in consul (new/removed services, health check status etc) and updates haproxy's configuration if needed.
+
 
 ## Requirements
 
@@ -127,16 +137,6 @@ journalctl -u haproxy -e
 ```
 You can add the flag `-f` so the logs are followed live.
 
-
-## How Does it Work
-
-Consul holds a registry of services. The services can be, in our example, IRI nodes. We register the IRI nodes in Consul using its API and add a health check.
-
-We are able to add some meta-tags that are going to help control a configuration per IRI node, for example, whether to check if this node has PoW, whether we should authenticate to it via HTTPS, define timeout, weight, max connections and so on.
-
-Once a service is registered Consul begins to run periodic health checks (defined by our custom script). If the health check is successful or failed will determine if HAProxy keeps it in its pool as a valid node to proxy traffic to.
-
-Consul-template watches for any changes in consul (new/removed services, health check status etc) and updates haproxy's configuration if needed.
 
 ## HAProxy
 
