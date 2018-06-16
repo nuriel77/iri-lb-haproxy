@@ -4,11 +4,13 @@ haproxy_image: haproxy
 # Haproxy image tag
 haproxy_tag: 1.8.9
 
-# consul watch handler
-consul_haproxy_handler: /usr/local/bin/consul_haproxy_handler.py
+# haproxy nofile limit:
+haproxy_nofile_limit: 60000
 
-# custom health check for iri nodes
-consul_node_check: /usr/local/bin/node_check.sh
+# Haproxy nameservers for dns resolution
+haproxy_nameservers:
+  - '8.8.8.8:53'
+  - '8.8.4.4:53'
 
 # haproxy admin socket address. Comment to disable.
 haproxy_admin_address: 127.0.0.1:9999

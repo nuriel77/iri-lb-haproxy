@@ -24,7 +24,7 @@ example:
 EOF
 }
 
-while getopts ":a:t:n:m:w:pkih" opt; do
+while getopts ":a:t:n:r:m:w:pkih" opt; do
     case "${opt}" in
         a)
             ADDRESS=$OPTARG
@@ -35,6 +35,9 @@ while getopts ":a:t:n:m:w:pkih" opt; do
             ;;
         i)
             IGNORE_REMOTE_LIMIT_API=1
+            ;;
+        r)
+            REQUIRED_APP_NAME=$OPTARG
             ;;
         m)
             MIN_API_VERSION=$OPTARG
@@ -71,14 +74,16 @@ if [[ -z "$ADDRESS" ]]; then
     exit 3
 fi
 
-TIMEOUT=${TIMEOUT:-3}
-MINIMUM_NEIGHBORS=${MINIMUM_NEIGHBORS:-2}
-MIN_API_VERSION="${MIN_API_VERSION:-1.4.2.1}"
-API_DURATION=${API_DURATION:-1}
+: ${TIMEOUT:=3}
+: ${MINIMUM_NEIGHBORS:=2}
+: ${MIN_API_VERSION:=1.4.2.1}
+: ${API_DURATION:=1}
+: ${CHECK_POW:=0}
+: ${REQUIRED_APP_NAME:=IRI}
+
 API_VERSION=1.4.2.1
 PAYLOAD='{"command": "getNodeInfo"}'
 REMOTE_LIMIT_API=(getNeighbors addNeighbors removeNeighbors attachToTangle interruptAttachingToTangle)
-CHECK_POW=${CHECK_POW:-0}
 
 # check node info
 DATA=$(curl $TLS_SKIP_VERIFY --retry 2 -m $TIMEOUT -s "$ADDRESS" -H "X-IOTA-API-Version: $API_VERSION" -H 'Content-Type: application/json' -d "$PAYLOAD")
@@ -103,11 +108,15 @@ LMI=$(echo "$DATA"| jq -r .latestMilestoneIndex)
 LSSMI=$(echo "$DATA"| jq -r .latestSolidSubtangleMilestoneIndex)
 NEIGHBORS=$(echo "$DATA"| jq -r .neighbors)
 APP_VERSION=$(echo "$DATA"| jq -r .appVersion)
+APP_NAME=$(echo "$DATA" | jq -r .appName)
 DURATION=$(echo "$DATA" | jq -r .duration)
 
 # check node info
 if (( $(awk 'BEGIN {print ("'$MIN_API_VERSON'" > "'$APP_VERSION'")}') )); then
     echo "Host app version should be minimum '$MIN_API_VERSION' but is '$APP_VERSION'"
+    exit 2
+elif [[ "$APP_NAME" != "$REQUIRED_APP_NAME" ]]; then
+    echo "Invalid appName: $APP_NAME"
     exit 2
 elif [[ $DURATION -gt $API_DURATION ]]; then
     echo "Response too slow, took $DURATION seconds"

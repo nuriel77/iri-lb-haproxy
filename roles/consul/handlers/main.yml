@@ -5,5 +5,17 @@
     enabled: yes
     daemon_reload: yes
 
+- name: restart consul-template
+  systemd:
+    name: consul-template.service
+    state: restarted
+    enabled: yes
+    daemon_reload: yes
+
+- name: reload consul-template
+  systemd:
+    name: consul-template.service
+    state: reloaded
+
 - name: reload systemd
   command: systemctl daemon-reload

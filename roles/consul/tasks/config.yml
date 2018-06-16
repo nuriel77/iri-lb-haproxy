@@ -1,7 +1,3 @@
-#- name: set consul download url
-#  set_fact:
-#    consul_url: "https://releases.hashicorp.com/consul/{{ consul_version }}/consul_{{ consul_version }}_linux_amd64.zip"
-
 # If running a cluster of Consul, use default interface's IP
 - name: set interface ip
   set_fact:
@@ -30,7 +26,6 @@
     mode: 0755
   with_items:
     - node_check.sh
-    - consul_haproxy_handler.py
   tags:
     - scripts
 
@@ -163,17 +158,6 @@
   notify: restart consul
   tags:
     - consul_tokens
-
-- name: copy handler config
-  template:
-    src: "templates/consul-haproxy-config.yml.j2"
-    dest: "{{ consul_config_dir }}/handler-config.yml"
-    mode: 0644
-    owner: root
-    group: "{{ consul_username }}"
-    force: "{{ overwrite | default('no') }}"
-  tags:
-    - handler_config
 
 - name: flush handlers
   meta: flush_handlers

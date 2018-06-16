@@ -16,6 +16,10 @@
   tags:
     - consul_config
 
+- import_tasks: config-consul-template.yml
+  tags:
+    - consul_template_config
+
 - import_tasks: uninstall.yml
   tags:
     - uninstall

@@ -1,3 +1,13 @@
+- name: set etc config dir ubuntu
+  set_fact:
+    etc_config_dir: default
+  when: ansible_distribution == 'Ubuntu'
+
+- name: set etc config dir centos
+  set_fact:
+    etc_config_dir: sysconfig
+  when: ansible_distribution == 'CentOS'
+
 - name: stop consul
   systemd:
     name: consul
@@ -5,12 +15,22 @@
     enabled: false
   ignore_errors: yes
 
+- name: stop consul-template
+  systemd:
+    name: consul-template
+    state: stopped
+    enabled: false
+  ignore_errors: yes
+
 - name: remove consul systemd file
   file:
-    path: '/etc/systemd/system/consul.service'
+    path: "/etc/systemd/system/{{ item }}"
     state: absent
   notify:
     - reload systemd
+  with_items:
+    - 'consul-template.service'
+    - 'consul.service'
 
 - name: remove consul related files and paths
   file:
@@ -19,8 +39,10 @@
   with_items:
     - "/var/lib/consul"
     - "/etc/consul"
-    - "{{ consul_haproxy_handler }}"
     - "{{ consul_node_check }}"
+    - "{{ consul_template_basedir }}"
+    - "/etc/haproxy/haproxy.cfg.tmpl"
+    - "/etc/{{ etc_config_dir }}/consul-template"
 
 - name: remove user to run consul as
   user:

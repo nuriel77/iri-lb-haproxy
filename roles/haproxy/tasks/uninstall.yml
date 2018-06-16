@@ -9,7 +9,6 @@
     - "{{ iri_api_port_remote }}"
   when: ansible_distribution == 'CentOS'
 
-
 - name: remove in lb rules from ufw
   block:
 
@@ -69,6 +68,8 @@
     - "/etc/{{ etc_config_dir }}/haproxy"
     - "/etc/haproxy"
     - "/usr/local/bin/show-stat"
+    - "/usr/local/bin/certbot-haproxy.sh"
+    - "/usr/local/bin/haproxy_reload.sh"
 
 - name: remove existing haproxy dir
   file:

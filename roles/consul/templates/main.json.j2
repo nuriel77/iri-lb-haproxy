@@ -41,23 +41,6 @@
     "udp_answer_limit": 100
   },
 {% endif %}
-{% if consul_watches_enabled is defined and consul_watches_enabled == True %}
-  "watches": [
-    {
-      "type": "service",
-      "service": "{{ lb_service_name }}",
-      "handler_type": "script",
-      "passingonly": true,
-      "args": ["/usr/bin/python", "/scripts/consul_haproxy_handler.py", "-c", "/config/handler.yml"]
-    },
-    {
-      "type": "checks",
-      "service": "{{ lb_service_name }}",
-      "handler_type" : "script",
-      "args": ["/usr/bin/python", "/scripts/consul_haproxy_handler.py", "-c", "/config/handler.yml"]
-    }
-  ],
-{% endif %}
   "acl_datacenter": "{{ default_dc }}",
   "acl_default_policy": "{{ consul_default_acl_policy | default('allow') }}",
   "acl_down_policy": "extend-cache",

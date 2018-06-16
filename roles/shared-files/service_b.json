@@ -1,16 +1,18 @@
 {
-  "ID": "10.80.0.10:16265",
-  "Name": "my.loadbalancer.io",
-  "tags": [],
-  "Address": "10.80.0.10",
+  "ID": "10.10.20.30:16265",
+  "Name": "iri",
+  "tags": [
+    "haproxy.maxconn=7"
+  ],
+  "Address": "10.10.20.30",
   "Port": 16265,
   "EnableTagOverride": false,
   "Check": {
-    "id": "10.80.0.10:16265",
-    "name": "API http://node01.iota.io:16265",
-    "args": ["/scripts/node_check.sh", "-a", "http://node01.iota.io:16265", "-i", "-m", "1.4.1.7"],
+    "id": "149.210.154.132:16265",
+    "name": "API http://10.10.20.30:16265",
+    "args": ["/scripts/node_check.sh", "-a", "http://10.10.20.30:16265", "-i", "-m", "1.4.1.7"],
     "Interval": "30s",
     "timeout": "5s",
-    "DeregisterCriticalServiceAfter": "1m"
+    "DeregisterCriticalServiceAfter": "24h"
   }
 }
