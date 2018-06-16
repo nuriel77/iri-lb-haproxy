@@ -8,9 +8,10 @@
     - haproxy_user
 
 - name: copy certbot haproxy script
-  copy:
-    src: files/certbot-haproxy.sh
+  get_url:
+    url: https://raw.githubusercontent.com/nuriel77/iri-playbook/master/roles/loadbalancer/files/certbot-haproxy.sh
     dest: /usr/local/bin/certbot-haproxy.sh
     mode: 0755
+    force: yes
   tags:
     - certbot
