@@ -13,11 +13,9 @@ consul_debug_level: DEBUG
 default_domain: "{{ lb_service_name }}"
 default_dc: my_dc
 consul_node_check: /usr/local/bin/node_check.sh
+consul_dns_enabled: false
 
 # Consul template
 consul_template_version: 0.19.5
 consul_template_basedir: /opt/consul-template
 consul_template_plugin: "{{ consul_template_basedir }}/consul-template-plugin.py"
-
-consul_dns_enabled: false
-consul_watches_enabled: false
