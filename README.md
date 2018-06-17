@@ -85,24 +85,34 @@ Variable files are located in `group_vars/all/*.yml`. If you want to edit any of
 
 The installation via the playbook is modular: you can choose what to install:
 
-For a simple installation, run the playbook (will not install docker nor configure firewall):
-```sh
+
+### Simple Installation
+For a simple installation, run the playbook (will not install docker nor configure firewall, see options below for extra options):
+
+```
 ansible-playbook -i inventory -v site.yml
 ```
+
+### Install Docker Option
 
 If you want the playbook to install docker for you, add the option `-e install_docker=true`:
 ```sh
 ansible-playbook -i inventory -v site.yml -e install_docker=true
 ```
 
-*NOTE* that with Ubuntu Bionic (18.04+) you need to add the option `-e docker_apt_release_channel=edge`!
+### Configure Firewalls Option
 
 If you want the playbook to configure the firewall, add the option `-e configure_firewall=true`.
 ```sh
 ansible-playbook -i inventory -v site.yml -e install_docker=true -e configure_firewall=true
 ```
+
+### Alternative SSH Port Option
+
 *NOTE* that to specify an alternative SSH port use the option `-e ssh_port=[port number]`
 
+
+### Upgrade System Packages Option
 
 In some cases it is required to update all system packages. To let the installation perform the upgrade, run the installer adding the option `-e upgrade_all_packages=true` to the installation command.
 
