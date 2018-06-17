@@ -140,9 +140,9 @@ backend iri_pow_back
 
     # abuser marking
     acl mark_as_abuser   sc1_inc_gpc0 gt 0
-    tcp-request content  reject if conn_rate_abuse mark_as_abuser
-    tcp-request content  reject if http_rate_abuse mark_as_abuser
-    tcp-request content  reject if conn_cur_abuse mark_as_abuser
+    tcp-request content  reject if conn_rate_abuse mark_as_abuser !whitelist
+    tcp-request content  reject if http_rate_abuse mark_as_abuser !whitelist
+    tcp-request content  reject if conn_cur_abuse mark_as_abuser !whitelist
 
     #acl is_bad lua.check_post -m str somestr
     #http-request deny if is_bad
@@ -177,9 +177,9 @@ backend iri_back
 
     # abuser marking
     acl mark_as_abuser   sc1_inc_gpc0 gt 0
-    tcp-request content  reject if conn_rate_abuse mark_as_abuser
-    tcp-request content  reject if http_rate_abuse mark_as_abuser
-    tcp-request content  reject if conn_cur_abuse mark_as_abuser
+    tcp-request content  reject if conn_rate_abuse mark_as_abuser !whitelist
+    tcp-request content  reject if http_rate_abuse mark_as_abuser !whitelist
+    tcp-request content  reject if conn_cur_abuse mark_as_abuser !whitelist
 
     #acl is_bad lua.check_post -m str badstr
     #http-request deny if is_bad
