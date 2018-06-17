@@ -38,7 +38,7 @@
     docker_apt_release_channel: edge
   when:
     - ansible_distribution == 'Ubuntu'
-    - ansible_distribution_release == 'Bionic'
+    - ansible_distribution_release == 'bionic'
 
 - name: Add Docker repository.
   apt_repository:
