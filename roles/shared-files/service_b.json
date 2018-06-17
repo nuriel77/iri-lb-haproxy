@@ -2,7 +2,8 @@
   "ID": "10.10.20.30:16265",
   "Name": "iri",
   "tags": [
-    "haproxy.maxconn=7"
+    "haproxy.maxconn=7",
+    "haproxy.weight=2"
   ],
   "Address": "10.10.20.30",
   "Port": 16265,

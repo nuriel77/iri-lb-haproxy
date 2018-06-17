@@ -4,6 +4,7 @@
   "tags": [
     "haproxy.maxconn=7",
     "haproxy.scheme=http",
+    "haproxy.weight=2",
     "haproxy.pow=only"
   ],
   "Address": "only.pow.io",
