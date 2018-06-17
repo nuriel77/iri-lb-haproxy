@@ -43,6 +43,7 @@
     - "{{ consul_template_basedir }}"
     - "/etc/haproxy/haproxy.cfg.tmpl"
     - "/etc/{{ etc_config_dir }}/consul-template"
+    - "/usr/local/bin/haproxy_reload.sh"
 
 - name: remove user to run consul as
   user:

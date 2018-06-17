@@ -42,6 +42,31 @@
     - "{{ consul_config_dir }}/conf.d"
     - "{{ consul_data_dir }}"
 
+- name: remove consul image
+  block:
+
+    - name: "stopping consul service, this might take a moment..."
+      systemd:
+        name: consul.service
+        state: stopped
+      ignore_errors: yes
+
+    - name: delete consul image
+      docker_image:
+        name: "{{ consul_image }}"
+        tag: "{{ consul_tag }}"
+        state: absent
+        force: yes
+
+  when:
+    - remove_consul_image is defined
+    - remove_consul_image|bool == True
+
+- name: check consul image exists
+  shell: "/usr/bin/docker images {{ consul_image }}:{{ consul_tag }} | grep -q ^consul"
+  register: consul_image_stat
+  failed_when: "consul_image_stat.rc > 1"
+
 - name: docker build consul image
   block:
 
@@ -65,7 +90,7 @@
       file:
         state: absent
         path: "{{ tempdir.path }}"
-
+  when: consul_image_stat.rc == 1
   tags:
     - docker_build
 

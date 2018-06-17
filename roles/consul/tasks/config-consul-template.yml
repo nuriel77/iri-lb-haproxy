@@ -71,6 +71,14 @@
     dest: "/etc/{{ etc_config_dir }}/consul-template"
     mode: 0600
 
+- name: copy haproxy_reload script
+  template:
+    src: templates/haproxy_reload.sh.j2
+    dest: /usr/local/bin/haproxy_reload.sh
+    mode: 0755
+  tags:
+    - haproxy_reload_script
+
 - name: flush handlers
   meta: flush_handlers
 
