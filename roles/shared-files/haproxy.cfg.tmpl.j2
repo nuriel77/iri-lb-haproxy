@@ -130,6 +130,9 @@ backend iri_pow_back
     timeout server-fin 5m
     filter compression
 
+    # Define source whitelist
+    acl whitelist src {{ haproxy_whitelist | join(" ") }}
+
     stick-table type ip size 200k expire 30s store conn_rate(3s),http_req_rate(10s),conn_cur,sess_rate(3s)
 
     # dynamic stuff for frontend + raise gpc0 counter
@@ -166,6 +169,9 @@ backend iri_back
     timeout server 5m
     timeout server-fin 5m
     filter compression
+
+    # Define source whitelist
+    acl whitelist src {{ haproxy_whitelist | join(" ") }}
 
     stick-table type ip size 200k expire 30s store conn_rate(3s),http_req_rate(10s),conn_cur,sess_rate(3s)
 

@@ -12,7 +12,7 @@ function haproxy_check(){
 {% endfor %}
       {{ haproxy_image }}:{{ haproxy_tag }} \
       haproxy -c -f /usr/local/etc/haproxy/haproxy.cfg
-    if [[ $? -ne 0 ]]; then
+    if [ $? -ne 0 ]; then
         echo "$0: configuration check error for haproxy.cfg" | logger -t haproxy-reload
         if [[ "$1" == "rollback" ]]; then
             cp "$HAPROXY_CONFIG_DIR/haproxy.cfg.previous" "$HAPROXY_CONFIG_DIR/haproxy.cfg"
@@ -28,9 +28,9 @@ if [ ! -f "$HAPROXY_CONFIG_DIR/haproxy.cfg.previous" ]; then
     cp "$HAPROXY_CONFIG_DIR/haproxy.cfg" "$HAPROXY_CONFIG_DIR/haproxy.cfg.previous"
     systemctl status haproxy >/dev/null
     RC=$?
-    if [[ $RC -eq 3 ]]; then
+    if [ $RC -eq 3 ]; then
         systemctl start haproxy
-    elif [[ $RC -eq 0 ]]; then
+    elif [ $RC -eq 0 ]; then
         systemctl reload haproxy
     fi  
     exit 0
