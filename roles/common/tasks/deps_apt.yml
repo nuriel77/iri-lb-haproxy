@@ -1,6 +1,9 @@
 - name: Update all packages to the latest version
   apt:
     upgrade: dist
+  when:
+    - upgrade_all_packages is defined
+    - upgrade_all_packages|bool == True
 
 - name: Install software-properties-common
   apt: state=latest name=software-properties-common update_cache=yes

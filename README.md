@@ -103,6 +103,10 @@ ansible-playbook -i inventory -v site.yml -e install_docker=true -e configure_fi
 ```
 *NOTE* that to specify an alternative SSH port use the option `-e ssh_port=[port number]`
 
+
+In some cases it is required to update all system packages. To let the installation perform the upgrade, run the installer adding the option `-e upgrade_all_packages=true` to the installation command.
+
+
 ## Uninstall
 
 Uninstall is best effort. It will remove all configured files, users, data directories, services, docker containers and images.
