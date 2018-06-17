@@ -1,11 +1,11 @@
 - name: set etc config dir ubuntu
   set_fact:
-    sysconfig_dir: default
+    sysconfig_dir: /etc/default
   when: ansible_distribution == 'Ubuntu'
 
 - name: set etc config dir centos
   set_fact:
-    sysconfig_dir: sysconfig
+    sysconfig_dir: /etc/sysconfig
   when: ansible_distribution == 'CentOS'
 
 - name: ensure etc haproxy dir
