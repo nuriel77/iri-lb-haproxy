@@ -2,15 +2,6 @@
 
 HAPRoxy load balancer for IRI nodes able to support highly available setups using Consul as a configuration backend.
 
-## TODO
-
-* Add more usage examples to the README / write a short blog with usage examples
-* Test support of certbot script with this installation
-* Test support of HTTPS backends client verification
-* Provide helper script to add/remove/update services (nodes)
-* Prometheus exporter for HAProxy
-* Centralized monitoring for backend nodes
-
 ## Table of contents
 
   * [Requirements](#requirements)
@@ -28,6 +19,8 @@ HAPRoxy load balancer for IRI nodes able to support highly available setups usin
   * [Appendix](#appendix)
     * [File Locations](#file-locations)
     * [Run with Docker Compose](#run-with-docker-compose)
+  * [TODO](#todo)
+  * [Donations](#donations)
 
 ## Description
 
@@ -415,3 +408,21 @@ docker-compose stop
 ```
 
 *NOTE* consul-template cannot be run in a container as it requires access to `systemctl` commands. For now it is best left to run as a binary on the host.
+
+## TODO
+
+* Add more usage examples to the README / write a short blog with usage examples
+* Add a UI to control the load-balancer (manage backends, view stats etc)
+* Test support of certbot script with this installation
+* Test support of HTTPS backends client verification
+* Provide helper script to add/remove/update services (nodes)
+* Prometheus exporter for HAProxy
+* Centralized monitoring for backend nodes
+
+## Donations
+
+If you like this project and would like to support it you can donate IOTA to the following address:
+
+```
+CSSFHHDBUQDGAUGYUHTENLBJ9JMTUFFLYLJZKTLRZVLLDCZZOQHOUXJOVDKXOLXGCJEMXJOULDIKADBHWMGVALMAUW 
+```
