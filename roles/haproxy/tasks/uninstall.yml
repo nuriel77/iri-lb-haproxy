@@ -1,3 +1,13 @@
+- name: set variables centos
+  set_fact:
+    sysconfig_dir: /etc/sysconfig
+  when: ansible_distribution == 'CentOS'
+
+- name: set variables ubuntu
+  set_fact:
+    sysconfig_dir: /etc/default
+  when: ansible_distribution == 'Ubuntu'
+
 - name: remove iri api port remote in firewall
   firewalld:
     port: "{{ item }}/tcp"
@@ -35,16 +45,6 @@
   ignore_errors: yes
   when: ansible_distribution == 'Ubuntu'
 
-- name: set etc config dir ubuntu
-  set_fact:
-    etc_config_dir: default
-  when: ansible_distribution == 'Ubuntu'
-
-- name: set etc config dir centos
-  set_fact:
-    etc_config_dir: sysconfig
-  when: ansible_distribution == 'CentOS'
-
 - name: stop haproxy
   systemd:
     name: haproxy
@@ -65,7 +65,7 @@
     state: absent
   with_items:
     - "/var/lib/haproxy"
-    - "/etc/{{ etc_config_dir }}/haproxy"
+    - "{{ sysconfig_dir }}/haproxy"
     - "/etc/haproxy"
     - "/usr/local/bin/show-stat"
     - "/usr/local/bin/certbot-haproxy.sh"

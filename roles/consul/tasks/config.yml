@@ -1,3 +1,13 @@
+- name: set variables centos
+  set_fact:
+    sysconfig_dir: /etc/sysconfig
+  when: ansible_distribution == 'CentOS'
+
+- name: set variables ubuntu
+  set_fact:
+    sysconfig_dir: /etc/default
+  when: ansible_distribution == 'Ubuntu'
+
 # If running a cluster of Consul, use default interface's IP
 - name: set interface ip
   set_fact:

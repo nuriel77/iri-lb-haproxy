@@ -1,13 +1,3 @@
-- name: set etc config dir ubuntu
-  set_fact:
-    etc_config_dir: default
-  when: ansible_distribution == 'Ubuntu'
-
-- name: set etc config dir centos
-  set_fact:
-    etc_config_dir: sysconfig
-  when: ansible_distribution == 'CentOS'
-
 - name: ensure etc haproxy dir
   file:
     path: /etc/haproxy

@@ -1,12 +1,12 @@
-- name: set etc config dir ubuntu
+- name: set variables centos
   set_fact:
-    etc_config_dir: default
-  when: ansible_distribution == 'Ubuntu'
-
-- name: set etc config dir centos
-  set_fact:
-    etc_config_dir: sysconfig
+    sysconfig_dir: /etc/sysconfig
   when: ansible_distribution == 'CentOS'
+
+- name: set variables ubuntu
+  set_fact:
+    sysconfig_dir: /etc/default
+  when: ansible_distribution == 'Ubuntu'
 
 - name: stop consul
   systemd:
@@ -42,7 +42,7 @@
     - "{{ consul_node_check }}"
     - "{{ consul_template_basedir }}"
     - "/etc/haproxy/haproxy.cfg.tmpl"
-    - "/etc/{{ etc_config_dir }}/consul-template"
+    - "{{ sysconfig_dir }}/consul-template"
     - "/usr/local/bin/haproxy_reload.sh"
 
 - name: remove user to run consul as
