@@ -26,7 +26,13 @@ if [ ! -f "$HAPROXY_CONFIG_DIR/haproxy.cfg.previous" ]; then
     echo "$0: First configuration" | logger -t haproxy-reload
     haproxy_check
     cp "$HAPROXY_CONFIG_DIR/haproxy.cfg" "$HAPROXY_CONFIG_DIR/haproxy.cfg.previous"
-    systemctl haproxy start
+    systemctl status haproxy >/dev/null
+    RC=$?
+    if [[ $RC -eq 3 ]]; then
+        systemctl start haproxy
+    elif [[ $RC -eq 0 ]]; then
+        systemctl reload haproxy
+    fi  
     exit 0
 fi
 
