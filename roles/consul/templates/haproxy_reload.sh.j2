@@ -1,17 +1,17 @@
-#!/bin/sh
+#!/bin/bash
 
 [ -n "${DEBUG}" ] && set -x
 
 : ${HAPROXY_CONFIG_DIR:=/etc/haproxy}
 
-function haproxy_check(){
+function haproxy_check() {
     /usr/bin/docker run --name haproxy-test \
       --rm \
 {% for mount in haproxy_mounts %}
       -v {{ mount }} \
 {% endfor %}
       {{ haproxy_image }}:{{ haproxy_tag }} \
-      haproxy -c -f /usr/local/etc/haproxy/haproxy.cfg
+      haproxy -c -f /usr/local/etc/haproxy/haproxy.cfg | logger -t haproxy-reload
     if [ $? -ne 0 ]; then
         echo "$0: configuration check error for haproxy.cfg" | logger -t haproxy-reload
         if [[ "$1" == "rollback" ]]; then
