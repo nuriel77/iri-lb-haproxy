@@ -23,10 +23,23 @@ haproxy_admin_socket: /var/run/hapee-lb.sock
 lb_bind_address: 0.0.0.0
 
 # This will be the external accessible port
+# to which clients/wallets connect to
 iri_api_port_remote: 14267
 
 # Haproxy enable https
 haproxy_https: true
+
+# Default bind options for haproxy https
+haproxy_default_bind_options: 'no-sslv3 no-tls-tickets'
+
+# Default bind ciphers for haproxy https
+haproxy_default_bind_ciphers: 'EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH'
+
+# Frontend response headers for https
+haproxy_https_response_headers:
+  - 'Strict-Transport-Security "max-age=31536000; includeSubdomains; preload;"'
+  - 'X-Frame-Options DENY'
+  - 'X-Content-Type-Options nosniff'
 
 # Haproxy stats port with https
 haproxy_stats_https: false
@@ -40,21 +53,6 @@ haproxy_iri_max_connections: 360
 
 # Allowed concurrent connections to PoW backend
 max_connections_pow_backend: 180
-
-# Max slots to reserve for PoW backend. This is a number of
-# slots that will be available for registering new IRI nodes
-# to be added to the PoW backend.
-max_pow_backend_slots: 10
-
-# Max slots to reserve for default iri backend. This is a number of
-# slots that will be available for registering new IRI nodes
-# to be added to the default (non-PoW) backend.
-max_backend_slots: 10
-
-# Allowed concurrent connections to a single PoW enabled
-# IRI node. This will set the value for all IRI nodes in PoW
-# backend.
-max_connections_per_pow_backend: 1
 
 # Allowed concurrent connection to default backend (no PoW)
 max_connections_backend: 180
@@ -94,11 +92,19 @@ haproxy_use_whitelist_file: True
 
 # A list of IPs to whitelist on haproxy
 # This will allow those IPs to bypass command
-# regex limitations. The format is a yaml list
-# thus ['value', 'value'] or `- value` on each
-# new line.
+# regex limitations and bypass denied commands.
+# The format is a yaml list, thus ['value', 'value']
+# or `- value` on each new line.
 haproxy_whitelist:
   - 127.0.0.1
+
+# HAProxy docker mounts
+haproxy_mounts:
+  - /etc/haproxy:/usr/local/etc/haproxy:ro,Z
+  - /etc/ssl:/etc/ssl:ro,Z
+  - /etc/letsencrypt:/etc/letsencrypt:ro,Z
+  - /dev/log:/dev/log:Z
+  - /etc/localtime:/etc/localtime:ro,Z
 
 # Commands to deny access to
 haproxy_deny_regex: '(get|remove|add)Neighbors'
