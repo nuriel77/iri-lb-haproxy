@@ -39,11 +39,11 @@ defaults
 
     stats hide-version
 
-{% if admin_password is defined %}
+{% if admin_password is defined and admin_username is defined %}
 # Can be used for various authentications
 # in case user wants to add more backends
 userlist lb_auth
-    user admin password {{ admin_password | password_hash('sha512') }}
+    user {{ admin_username }} password {{ admin_password | password_hash('sha512') }}
 {% endif %}
 
 frontend iri_front
@@ -94,7 +94,7 @@ frontend iri_front
     acl api_header req.hdr(X-IOTA-API-Version) -m found
     http-request deny if !api_header !options_method
 
-{% if haproxy_remote_auth is defined and haproxy_remote_auth %}
+{% if haproxy_remote_auth is defined and haproxy_remote_auth|bool == True and admin_password is defined and admin_username is defined %}
     # Lock with password
     acl lb_allow http_auth(lb_auth)
     http-request allow if lb_allow
@@ -215,7 +215,7 @@ listen stats
     stats hide-version
     stats uri /
 
-{% if admin_password is defined %}
+{% if admin_password is defined and admin_username is defined %}
     # Lock with password
     acl lb_allow http_auth(lb_auth)
     http-request auth realm UserAuth if !lb_allow
