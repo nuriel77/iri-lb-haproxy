@@ -33,6 +33,13 @@
     warn: no
   when: add_repository_key is failed
 
+- name: force assign docker edge for ubuntu bionic
+  set_fact:
+    docker_apt_release_channel: edge
+  when:
+    - ansible_distribution == 'Ubuntu'
+    - ansible_distribution_release == 'Bionic'
+
 - name: Add Docker repository.
   apt_repository:
     repo: "{{ docker_apt_repository }}"
