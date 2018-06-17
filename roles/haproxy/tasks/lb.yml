@@ -18,8 +18,6 @@
     src: templates/whitelist.lst.j2
     dest: /etc/haproxy/whitelist.lst
     force: "{{ overwrite | default('no') }}"
-  notify:
-    - restart haproxy
   tags:
     - haproxy_cfg
   when:
@@ -35,8 +33,6 @@
     mode: 0644
     owner: root
     group: root
-  notify:
-    - restart haproxy
   tags:
     - haproxy_cfg
 
