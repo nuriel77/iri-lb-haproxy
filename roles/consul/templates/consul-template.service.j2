@@ -11,7 +11,11 @@ ExecStart={{ consul_template_basedir }}/consul-template \
   -template=${HAPROXY_TEMPLATE}:${HAPROXY_CONFIG}:${HAPROXY_RELOAD} \
   -log-level=${CONSUL_TEMPLATE_LOGLEVEL} \
   -consul-addr=${CONSUL_ADDRESS} \
-  -reload-signal=SIGHUP
+  -retry=6 \
+  -consul-retry=12 \
+  -pid-file=/var/run/consul-template.pid \
+  -reload-signal=SIGHUP \
+  -kill-signal=SIGTERM
 ExecReload=/bin/kill -HUP $MAINPID
 
 # No need to mess with /dev
