@@ -12,8 +12,6 @@
   file:
     path: /etc/haproxy
     state: directory
-    owner: root
-    group: "{{ haproxy_username }}"
     mode: 0750
 
 - name: remove existing consul-template basedir
