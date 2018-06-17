@@ -25,6 +25,7 @@ services:
       - /dev/log:/dev/log:Z
       - /etc/ssl:/etc/ssl:ro,Z
       - /etc/letsencrypt:/etc/letsencrypt:ro,Z
+      - /etc/localtime:/etc/localtime:ro,Z
     network_mode: "host"
     depends_on:
       - consul
