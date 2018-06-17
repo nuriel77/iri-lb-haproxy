@@ -15,7 +15,7 @@ services:
       - "agent"
     network_mode: "host"
 
-  caddy:
+  haproxy:
     image: haproxy:1.8.9
     container_name: haproxy
     hostname: haproxy
