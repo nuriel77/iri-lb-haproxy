@@ -56,10 +56,10 @@ def main():
         indent = '    ' if i > 0 else ''
         
         if scheme == 'http':
-            data_output.append("%sserver ID-%s %s:%s weight %s maxconn %s resolvers dns resolve-prefer ipv4 check" %
+            data_output.append("%sserver %s %s:%s weight %s maxconn %s resolvers dns resolve-prefer ipv4 check" %
                                (indent, service['ID'], service['Address'], service['Port'], weight, maxconn))
         elif scheme == 'https':
-            data_output.append("%sserver ID-%s %s:%s weight %s maxconn %s resolvers dns resolve-prefer ipv4 check ssl verify %s %s" %
+            data_output.append("%sserver %s %s:%s weight %s maxconn %s resolvers dns resolve-prefer ipv4 check ssl verify %s %s" %
                                (indent, service['ID'], service['Address'], service['Port'], weight, maxconn, sslverify, verifyhost))
         
     print("\n".join(data_output))
