@@ -9,9 +9,19 @@
 
 - name: copy certbot haproxy script
   get_url:
-    url: https://raw.githubusercontent.com/nuriel77/iri-playbook/master/roles/loadbalancer/files/certbot-haproxy.sh
+    url: "{{ certbox_haproxy_script_url }}"
     dest: /usr/local/bin/certbot-haproxy.sh
     mode: 0755
     force: yes
   tags:
     - certbot
+
+- name: 'download haproxy docker image, this can take a moment...'
+  docker_image:
+    name: "{{ haproxy_image }}"
+    tag: "{{ haproxy_tag }}"
+    force: "{{ force_pull_image | default('no') }}"
+  tags:
+    - haproxy_image
+  notify:
+    - restart haproxy

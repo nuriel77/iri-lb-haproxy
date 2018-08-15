@@ -111,3 +111,6 @@ haproxy_deny_regex: '(get|remove|add)Neighbors'
 
 # Bad commands regex example
 haproxy_bad_command: '\"getTransactionsToApprove\"(.*)GFCCGTGSUEVBZYFK9QNAHOVHXUMEATUFLGBZLDKMOGWCXVUZDVEJVCLLCJJ9NQOIMOLMUMFMGZSI99999'
+
+# Certbot script for haproxy
+certbox_haproxy_script_url: 'https://raw.githubusercontent.com/nuriel77/iri-playbook/master/roles/loadbalancer/files/certbot-haproxy.sh'
