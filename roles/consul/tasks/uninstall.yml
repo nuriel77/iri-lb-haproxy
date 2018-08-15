@@ -58,6 +58,7 @@
 
 - name: remove consul image
   docker_image:
+    forice: yes
     state: absent
     name: "{{ consul_image }}"
     tag: "{{ consul_tag }}"

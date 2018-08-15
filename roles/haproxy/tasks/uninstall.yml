@@ -89,5 +89,7 @@
 - name: remove haproxy image
   docker_image:
     state: absent
+    force: yes
     name: "{{ haproxy_image }}"
     tag: "{{ haproxy_tag }}"
+  ignore_errors: yes

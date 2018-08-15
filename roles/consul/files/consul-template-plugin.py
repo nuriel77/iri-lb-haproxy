@@ -53,7 +53,7 @@ def main():
                    sslverify = 'none'
                    verifyhost = ''
 
-        indent = '    ' if i > 0 else ''
+        indent = ' ' * 4 if i > 0 else ''
         
         if scheme == 'http':
             data_output.append("%sserver %s %s:%s weight %s maxconn %s resolvers dns resolve-prefer ipv4 check" %

@@ -7,6 +7,9 @@
   tags:
     - haproxy_user
 
+# TODO: Add static file to this repository
+# as iri-playbook is going to move to dockerized
+# version and the script will be deprecated
 - name: copy certbot haproxy script
   get_url:
     url: "{{ certbox_haproxy_script_url }}"
