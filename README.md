@@ -2,6 +2,9 @@
 
 HAPRoxy load balancer for IRI nodes able to support highly available setups using Consul as a configuration backend.
 
+This is a Proof-of-Concept. Most of the work done here has already been added to the IRI playbook dockerized version: https://github.com/nuriel77/iri-playbook/tree/feat/docker
+
+
 ## Table of contents
 
   * [Requirements](#requirements)
