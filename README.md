@@ -56,7 +56,7 @@ Consul-template watches for any changes in consul (new/removed services, health 
 In order to use this PoC you must have the following installed on your server:
 
 * Ansible (>=2.4)
-* CentOS (>=7.4) or Ubuntu (>=16.04)
+* CentOS (>=7.4) or Ubuntu 18.04
 
 To install Ansible for Ubuntu see: https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#latest-releases-via-apt-ubuntu
 
