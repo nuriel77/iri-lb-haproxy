@@ -230,7 +230,7 @@ Here is an example with some explanation:
 ```
 {
   "ID": "10.10.0.110:15265",    <--- This is the ID of the service. Using this ip:port combination we can later delete the service from Consul.
-  "Name": "my.loadbalancer.io", <--- This is the name of the Consul service. In essence, this should also be the hostname of the loadbalancer(s).
+  "Name": "iri",                <--- This is the name of the Consul service. This should be set to 'iri' for all added nodes.
   "tags": [
     "haproxy.maxconn=7",        <--- This tag will ensure that this IRI node is only allowed maximum 7 concurrent connections
     "haproxy.scheme=http",      <--- The authentication scheme to this IRI node is via http
@@ -254,7 +254,7 @@ Here is an example of a service (IRI node) that supports PoW:
 ```
 {
   "ID": "10.10.0.110:15265",     <--- Service unique ID
-  "Name": "my.loadbalancer.io",  <--- We always use the same service name to make sure this gets configured in Haproxy
+  "Name": "iri",                 <--- We always use the same service name 'iri' to make sure this gets configured in Haproxy
   "tags": [
     "haproxy.maxconn=7",         <--- Max concurrent connections to this node
     "haproxy.scheme=http",       <--- connection scheme (http is anyway the default)
@@ -278,7 +278,7 @@ A simple service's definition:
 ```
 {
   "ID": "10.80.0.10:16265",
-  "Name": "my.loadbalancer.io",
+  "Name": "iri",
   "tags": [],
   "Address": "10.80.0.10",
   "Port": 16265,
@@ -299,7 +299,7 @@ HTTPS enabled service/node:
 ```
 {
   "ID": "10.10.10.115:14265",
-  "Name": "my.loadbalancer.io",
+  "Name": "iri",
   "tags": [
     "haproxy.weight=10",    <--- sets weight for HAPRoxy
     "haproxy.scheme=https", <--- scheme is https
